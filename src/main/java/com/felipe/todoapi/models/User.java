@@ -1,5 +1,6 @@
 package com.felipe.todoapi.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -22,6 +23,7 @@ public class User {
   private String email;
 
   @Column(length = 30, nullable = false)
+  @JsonIgnore
   private String password;
 
   @CreationTimestamp
@@ -32,6 +34,12 @@ public class User {
   private List<Task> tasks = new ArrayList<>();
 
   public User() {}
+
+  public User(String name, String email, String password) {
+    this.name = name;
+    this.email = email;
+    this.password = password;
+  }
 
   public String getId() {
     return this.id;
