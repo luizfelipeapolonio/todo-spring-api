@@ -30,6 +30,6 @@ public class UserController {
   @PostMapping("/auth/register")
   public ResponseEntity<UserRegisterResponseDTO> register(@RequestBody @Valid @NotNull UserRegisterDTO user) {
     UserRegisterResponseDTO newUser = this.userService.register(user);
-    return ResponseEntity.ok(newUser);
+    return ResponseEntity.ok().body(newUser);
   }
 }
