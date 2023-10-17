@@ -24,8 +24,8 @@ public class Task {
   @Column(nullable = false)
   private Integer priority;
 
-  @Column(name = "is_done", columnDefinition = "BOOLEAN DEFAULT false", nullable = false)
-  private Boolean isDone;
+  @Column(name = "is_done", nullable = false)
+  private Boolean isDone = false;
 
   @CreationTimestamp
   @Column(name = "created_at", columnDefinition = "TIMESTAMP(3)", nullable = false)

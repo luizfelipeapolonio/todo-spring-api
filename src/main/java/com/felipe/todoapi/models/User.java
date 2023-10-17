@@ -1,6 +1,7 @@
 package com.felipe.todoapi.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -22,8 +23,8 @@ public class User {
   @Column(nullable = false, unique = true)
   private String email;
 
-  @Column(length = 30, nullable = false)
   @JsonIgnore
+  @Column(length = 30, nullable = false)
   private String password;
 
   @CreationTimestamp
@@ -31,6 +32,7 @@ public class User {
   private LocalDateTime createdAt;
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private List<Task> tasks = new ArrayList<>();
 
   public User() {}
@@ -75,5 +77,9 @@ public class User {
 
   public LocalDateTime getCreatedAt() {
     return this.createdAt;
+  }
+
+  public List<Task> getTasks() {
+    return this.tasks;
   }
 }
