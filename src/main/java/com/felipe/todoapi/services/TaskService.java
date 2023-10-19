@@ -89,4 +89,11 @@ public class TaskService {
       })
       .orElseThrow(() -> new RuntimeException("Tarefa não encontrada!"));
   }
+
+  public void delete(@NotNull @NotBlank String id) {
+    String taskId = this.taskRepository.findById(id)
+      .map(Task::getId)
+      .orElseThrow(() -> new RuntimeException("Tarefa não encontrada!"));
+    this.taskRepository.deleteById(taskId);
+  }
 }

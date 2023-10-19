@@ -48,4 +48,10 @@ public class TaskController {
     TaskResponseDTO updatedTask = this.taskService.update(id, task);
     return ResponseEntity.ok().body(updatedTask);
   }
+
+  @DeleteMapping("/task/{id}")
+  public ResponseEntity<Void> delete(@PathVariable @NotNull @NotBlank String id) {
+    this.taskService.delete(id);
+    return ResponseEntity.noContent().build();
+  }
 }
