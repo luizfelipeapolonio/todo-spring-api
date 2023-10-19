@@ -2,12 +2,14 @@ package com.felipe.todoapi.services;
 
 import com.felipe.todoapi.dtos.TaskCreateDTO;
 import com.felipe.todoapi.dtos.TaskResponseDTO;
+import com.felipe.todoapi.dtos.TaskUpdateDTO;
 import com.felipe.todoapi.dtos.mappers.TaskMapper;
 import com.felipe.todoapi.models.Task;
 import com.felipe.todoapi.models.User;
 import com.felipe.todoapi.repositories.TaskRepository;
 import com.felipe.todoapi.repositories.UserRepository;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -49,5 +51,42 @@ public class TaskService {
 
         return this.taskMapper.toDTO(createdTask);
       }).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+  }
+
+  public TaskResponseDTO findById(@NotNull @NotBlank String id) {
+    /*
+    * TODO: verificar se a task pertence ao usuário autenticado
+    *   - Sugestão: usar o user_id dentro da task para comparar com o usuário autenticado
+    */
+    return this.taskRepository.findById(id)
+      .map(this.taskMapper::toDTO)
+      .orElseThrow(() -> new RuntimeException("Tarefa não encontrada"));
+  }
+
+  public TaskResponseDTO update(@NotNull @NotBlank String id, @Valid TaskUpdateDTO task) {
+    /*
+    * TODO: Verificar por usuário autenticado
+    *   - Sugestão: Reaproveitar o método findById para buscar a tarefa
+    */
+    return this.taskRepository.findById(id)
+      .map(taskFound -> {
+        if(task.title() != null) {
+          taskFound.setTitle(task.title());
+        }
+        if(task.description() != null) {
+          taskFound.setDescription(task.description());
+        }
+        if(task.priority() != null) {
+          taskFound.setPriority(task.priority());
+        }
+        if(task.isDone() != null) {
+          taskFound.setIsDone(task.isDone());
+        }
+
+        Task updatedTask = this.taskRepository.save(taskFound);
+
+        return this.taskMapper.toDTO(updatedTask);
+      })
+      .orElseThrow(() -> new RuntimeException("Tarefa não encontrada!"));
   }
 }
