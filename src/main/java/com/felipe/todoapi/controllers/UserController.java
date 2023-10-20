@@ -1,5 +1,6 @@
 package com.felipe.todoapi.controllers;
 
+import com.felipe.todoapi.dtos.LoginDTO;
 import com.felipe.todoapi.dtos.UserRegisterDTO;
 import com.felipe.todoapi.dtos.UserRegisterResponseDTO;
 import com.felipe.todoapi.models.User;
@@ -31,5 +32,11 @@ public class UserController {
   public ResponseEntity<UserRegisterResponseDTO> register(@RequestBody @Valid @NotNull UserRegisterDTO user) {
     UserRegisterResponseDTO newUser = this.userService.register(user);
     return ResponseEntity.ok().body(newUser);
+  }
+
+  @PostMapping("/auth/login")
+  public ResponseEntity<String> login(@RequestBody @Valid @NotNull LoginDTO login) {
+    String token = this.userService.login(login);
+    return ResponseEntity.ok().body(token);
   }
 }
