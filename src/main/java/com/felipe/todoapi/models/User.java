@@ -24,7 +24,7 @@ public class User {
   private String email;
 
   @JsonIgnore
-  @Column(length = 30, nullable = false)
+  @Column(nullable = false)
   private String password;
 
   @CreationTimestamp
