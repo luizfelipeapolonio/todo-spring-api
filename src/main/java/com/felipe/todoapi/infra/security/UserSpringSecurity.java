@@ -24,6 +24,10 @@ public class UserSpringSecurity implements UserDetails {
     return null;
   }
 
+  public String getId() {
+    return this.id;
+  }
+
   @Override
   public String getPassword() {
     return this.password;
