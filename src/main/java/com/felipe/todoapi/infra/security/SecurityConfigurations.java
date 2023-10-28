@@ -19,9 +19,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfigurations {
 
   private final SecurityFilter securityFilter;
+  private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
-  public SecurityConfigurations(SecurityFilter securityFilter) {
+  public SecurityConfigurations(
+    SecurityFilter securityFilter,
+    CustomAuthenticationEntryPoint customAuthenticationEntryPoint
+  ) {
     this.securityFilter = securityFilter;
+    this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
   }
 
   @Bean
@@ -32,8 +37,11 @@ public class SecurityConfigurations {
       .authorizeHttpRequests(authorize -> authorize
         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+        .requestMatchers(HttpMethod.GET, "/api/auth/users").permitAll() // ***REMOVER***
         .anyRequest().authenticated()
       )
+      .exceptionHandling(exception -> exception
+        .authenticationEntryPoint(this.customAuthenticationEntryPoint))
       .addFilterBefore(this.securityFilter, UsernamePasswordAuthenticationFilter.class)
       .build();
   }

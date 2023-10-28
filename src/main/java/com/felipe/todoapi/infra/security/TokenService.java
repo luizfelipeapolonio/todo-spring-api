@@ -27,7 +27,7 @@ public class TokenService {
         .withExpiresAt(this.generateExpirationDate())
         .sign(algorithm);
     } catch(JWTCreationException exception) {
-      throw new RuntimeException("Erro ao gerar token!", exception);
+      throw new JWTCreationException("Erro ao gerar token!", exception);
     }
   }
 
@@ -41,11 +41,12 @@ public class TokenService {
         .verify(token)
         .getSubject();
     } catch(JWTVerificationException exception) {
-      return "";
+      throw new JWTVerificationException("Token inválido");
     }
   }
 
   private Instant generateExpirationDate() {
-    return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+    // TODO: Ajustar para 2 horas o tempo de expiração do token
+    return LocalDateTime.now().plusMinutes(1).toInstant(ZoneOffset.of("-03:00"));
   }
 }
