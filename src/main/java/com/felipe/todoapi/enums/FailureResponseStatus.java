@@ -1,11 +1,11 @@
 package com.felipe.todoapi.enums;
 
-public enum ResponseStatus {
+public enum FailureResponseStatus {
   SUCCESS("Success"), ERROR("Error");
 
   private final String value;
 
-  ResponseStatus(String value) {
+  FailureResponseStatus(String value) {
     this.value = value;
   }
 
