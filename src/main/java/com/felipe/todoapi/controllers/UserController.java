@@ -43,13 +43,13 @@ public class UserController {
   }
 
   @PostMapping("/auth/register")
-  @ResponseStatus(HttpStatus.OK)
+  @ResponseStatus(HttpStatus.CREATED)
   public CustomResponseBody<UserResponseDTO> register(@RequestBody @Valid @NotNull UserRegisterDTO user) {
     UserResponseDTO newUser = this.userService.register(user);
 
     CustomResponseBody<UserResponseDTO> responseBody = new CustomResponseBody<>();
     responseBody.setStatus(FailureResponseStatus.SUCCESS);
-    responseBody.setCode(HttpStatus.OK);
+    responseBody.setCode(HttpStatus.CREATED);
     responseBody.setMessage("Usuário criado com sucesso");
     responseBody.setData(newUser);
 
