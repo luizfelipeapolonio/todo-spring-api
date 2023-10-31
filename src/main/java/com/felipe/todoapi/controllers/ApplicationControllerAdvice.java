@@ -1,11 +1,11 @@
 package com.felipe.todoapi.controllers;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.felipe.todoapi.enums.FailureResponseStatus;
 import com.felipe.todoapi.exceptions.RecordNotFoundException;
 import com.felipe.todoapi.exceptions.UserAlreadyExistsException;
+import com.felipe.todoapi.utils.CustomResponseBody;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -19,58 +19,85 @@ public class ApplicationControllerAdvice {
 
   @ExceptionHandler(RecordNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
-  public String handleNotFoundException(RecordNotFoundException e) {
-    return e.getMessage();
+  public CustomResponseBody<Void> handleNotFoundException(RecordNotFoundException e) {
+    CustomResponseBody<Void> responseBody = new CustomResponseBody<>();
+    responseBody.setStatus(FailureResponseStatus.ERROR);
+    responseBody.setCode(HttpStatus.NOT_FOUND);
+    responseBody.setMessage(e.getMessage());
+    responseBody.setData(null);
+
+    return responseBody;
   }
 
   @ExceptionHandler({UsernameNotFoundException.class, BadCredentialsException.class})
   @ResponseStatus(HttpStatus.UNAUTHORIZED)
-  public ProblemDetail handleAuthenticationException(Exception e) {
-    ProblemDetail errorDetail = ProblemDetail
-      .forStatusAndDetail(HttpStatusCode.valueOf(401), e.getMessage());
-    errorDetail.setProperty("access_denied_reason", "Authentication Failure");
+  public CustomResponseBody<Void> handleAuthenticationException(Exception e) {
+    CustomResponseBody<Void> responseBody = new CustomResponseBody<>();
+    responseBody.setStatus(FailureResponseStatus.ERROR);
+    responseBody.setCode(HttpStatus.UNAUTHORIZED);
+    responseBody.setMessage(e.getMessage());
+    responseBody.setData(null);
 
-    return errorDetail;
+    return responseBody;
   }
 
   @ExceptionHandler(JWTVerificationException.class)
-  @ResponseStatus(HttpStatus.FORBIDDEN)
-  public ProblemDetail handleJWTVerificationException(JWTVerificationException e) {
-    ProblemDetail errorDetail = ProblemDetail
-      .forStatusAndDetail(HttpStatusCode.valueOf(403), e.getMessage());
-    errorDetail.setProperty("access_denied_reason", "Invalid token");
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  public CustomResponseBody<Void> handleJWTVerificationException(JWTVerificationException e) {
+    CustomResponseBody<Void> responseBody = new CustomResponseBody<>();
+    responseBody.setStatus(FailureResponseStatus.ERROR);
+    responseBody.setCode(HttpStatus.UNAUTHORIZED);
+    responseBody.setMessage(e.getMessage());
+    responseBody.setData(null);
 
-    return errorDetail;
+    return responseBody;
   }
 
   @ExceptionHandler(AccessDeniedException.class)
   @ResponseStatus(HttpStatus.FORBIDDEN)
-  public ProblemDetail handleAccessDeniedException(AccessDeniedException e) {
-    ProblemDetail errorDetail = ProblemDetail
-      .forStatusAndDetail(HttpStatusCode.valueOf(403), e.getMessage());
-    errorDetail.setProperty("access_denied_reason", "Authorization Failure");
+  public CustomResponseBody<Void> handleAccessDeniedException(AccessDeniedException e) {
+    CustomResponseBody<Void> responseBody = new CustomResponseBody<>();
+    responseBody.setStatus(FailureResponseStatus.ERROR);
+    responseBody.setCode(HttpStatus.FORBIDDEN);
+    responseBody.setMessage(e.getMessage());
+    responseBody.setData(null);
 
-    return errorDetail;
+    return responseBody;
   }
 
   @ExceptionHandler(InsufficientAuthenticationException.class)
   @ResponseStatus(HttpStatus.UNAUTHORIZED)
-  public ProblemDetail handleAuthenticationException(InsufficientAuthenticationException e) {
-    ProblemDetail errorDetail = ProblemDetail
-      .forStatusAndDetail(HttpStatusCode.valueOf(401), e.getMessage());
-    errorDetail.setProperty("access_denied_reason", "Authentication Failure");
+  public CustomResponseBody<Void> handleAuthenticationException() {
+    CustomResponseBody<Void> responseBody = new CustomResponseBody<>();
+    responseBody.setStatus(FailureResponseStatus.ERROR);
+    responseBody.setCode(HttpStatus.UNAUTHORIZED);
+    responseBody.setMessage("Autenticação é necessária para acessar este recurso");
+    responseBody.setData(null);
 
-    return errorDetail;
+    return responseBody;
   }
 
-  // TODO: Criar exceção genérica
   @ExceptionHandler(UserAlreadyExistsException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ProblemDetail handleEmailAlreadyExistsException(UserAlreadyExistsException e) {
-    ProblemDetail errorDetail = ProblemDetail
-      .forStatusAndDetail(HttpStatusCode.valueOf(400), e.getMessage());
-    errorDetail.setProperty("access_denied_reason", "User already exists");
+  @ResponseStatus(HttpStatus.CONFLICT)
+  public CustomResponseBody<Void> handleEmailAlreadyExistsException(UserAlreadyExistsException e) {
+    CustomResponseBody<Void> responseBody = new CustomResponseBody<>();
+    responseBody.setStatus(FailureResponseStatus.ERROR);
+    responseBody.setCode(HttpStatus.CONFLICT);
+    responseBody.setMessage(e.getMessage());
+    responseBody.setData(null);
 
-    return errorDetail;
+    return responseBody;
+  }
+
+  @ExceptionHandler(Exception.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public CustomResponseBody<Void> handleUncaughtException() {
+    CustomResponseBody<Void> responseBody = new CustomResponseBody<>();
+    responseBody.setStatus(FailureResponseStatus.ERROR);
+    responseBody.setCode(HttpStatus.INTERNAL_SERVER_ERROR);
+    responseBody.setMessage("Ocorreu um erro interno do servidor");
+    responseBody.setData(null);
+
+    return responseBody;
   }
 }
