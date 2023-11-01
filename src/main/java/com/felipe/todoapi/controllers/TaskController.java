@@ -3,11 +3,13 @@ package com.felipe.todoapi.controllers;
 import com.felipe.todoapi.dtos.TaskCreateDTO;
 import com.felipe.todoapi.dtos.TaskResponseDTO;
 import com.felipe.todoapi.dtos.TaskUpdateDTO;
+import com.felipe.todoapi.enums.FailureResponseStatus;
 import com.felipe.todoapi.services.TaskService;
+import com.felipe.todoapi.utils.CustomResponseBody;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,35 +25,73 @@ public class TaskController {
   }
 
   @GetMapping("/task")
-  public ResponseEntity<List<TaskResponseDTO>> getAllUserTasks() {
+  @ResponseStatus(HttpStatus.OK)
+  public CustomResponseBody<List<TaskResponseDTO>> getAllUserTasks() {
     List<TaskResponseDTO> tasks = this.taskService.getAllUserTasks();
-    return ResponseEntity.ok().body(tasks);
+
+    CustomResponseBody<List<TaskResponseDTO>> responseBody = new CustomResponseBody<>();
+    responseBody.setStatus(FailureResponseStatus.SUCCESS);
+    responseBody.setCode(HttpStatus.OK);
+    responseBody.setMessage("Todas as tarefas do usuário");
+    responseBody.setData(tasks);
+
+    return responseBody;
   }
 
   @PostMapping("/task")
-  public ResponseEntity<TaskResponseDTO> create(@RequestBody @Valid @NotNull TaskCreateDTO task) {
+  @ResponseStatus(HttpStatus.CREATED)
+  public CustomResponseBody<TaskResponseDTO> create(@RequestBody @Valid @NotNull TaskCreateDTO task) {
     TaskResponseDTO createdTask = this.taskService.create(task);
-    return ResponseEntity.ok().body(createdTask);
+
+    CustomResponseBody<TaskResponseDTO> responseBody = new CustomResponseBody<>();
+    responseBody.setStatus(FailureResponseStatus.SUCCESS);
+    responseBody.setCode(HttpStatus.CREATED);
+    responseBody.setMessage("Tarefa criada com sucesso");
+    responseBody.setData(createdTask);
+
+    return responseBody;
   }
 
   @GetMapping("/task/{id}")
-  public ResponseEntity<TaskResponseDTO> findById(@PathVariable @NotNull @NotBlank String id) {
+  @ResponseStatus(HttpStatus.OK)
+  public CustomResponseBody<TaskResponseDTO> findById(@PathVariable @NotNull @NotBlank String id) {
     TaskResponseDTO task = this.taskService.findById(id);
-    return ResponseEntity.ok().body(task);
+
+    CustomResponseBody<TaskResponseDTO> responseBody = new CustomResponseBody<>();
+    responseBody.setStatus(FailureResponseStatus.SUCCESS);
+    responseBody.setCode(HttpStatus.OK);
+    responseBody.setMessage("Tarefa encontrada");
+    responseBody.setData(task);
+
+    return responseBody;
   }
 
   @PatchMapping("/task/{id}")
-  public ResponseEntity<TaskResponseDTO> update(
+  @ResponseStatus(HttpStatus.OK)
+  public CustomResponseBody<TaskResponseDTO> update(
     @PathVariable @NotNull @NotBlank String id,
     @RequestBody @Valid TaskUpdateDTO task
   ) {
     TaskResponseDTO updatedTask = this.taskService.update(id, task);
-    return ResponseEntity.ok().body(updatedTask);
+
+    CustomResponseBody<TaskResponseDTO> responseBody = new CustomResponseBody<>();
+    responseBody.setStatus(FailureResponseStatus.SUCCESS);
+    responseBody.setCode(HttpStatus.OK);
+    responseBody.setMessage("Tarefa atualizada com sucesso");
+    responseBody.setData(updatedTask);
+
+    return responseBody;
   }
 
   @DeleteMapping("/task/{id}")
-  public ResponseEntity<Void> delete(@PathVariable @NotNull @NotBlank String id) {
+  @ResponseStatus(HttpStatus.OK)
+  public CustomResponseBody<Void> delete(@PathVariable @NotNull @NotBlank String id) {
     this.taskService.delete(id);
-    return ResponseEntity.noContent().build();
+    return new CustomResponseBody<>(
+      FailureResponseStatus.SUCCESS,
+      HttpStatus.OK,
+      "Tarefa excluída com sucesso",
+      null
+    );
   }
 }

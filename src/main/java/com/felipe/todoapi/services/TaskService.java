@@ -4,6 +4,8 @@ import com.felipe.todoapi.dtos.TaskCreateDTO;
 import com.felipe.todoapi.dtos.TaskResponseDTO;
 import com.felipe.todoapi.dtos.TaskUpdateDTO;
 import com.felipe.todoapi.dtos.mappers.TaskMapper;
+import com.felipe.todoapi.exceptions.RecordNotFoundException;
+import com.felipe.todoapi.infra.security.UserSpringSecurity;
 import com.felipe.todoapi.models.Task;
 import com.felipe.todoapi.models.User;
 import com.felipe.todoapi.repositories.TaskRepository;
@@ -11,6 +13,7 @@ import com.felipe.todoapi.repositories.UserRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,57 +31,81 @@ public class TaskService {
     this.taskMapper = taskMapper;
   }
 
-  public List<TaskResponseDTO> getAllUserTasks() {
-    // TODO: Buscar por usuário autenticado
-    List<Task> userTasks = this.userRepository.findById("f6094ee7-f8ac-4f4c-9e1b-b0a777e95ff8")
-      .map(User::getTasks)
-      .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
+  public List<TaskResponseDTO> getAllUserTasks() throws AccessDeniedException {
+    UserSpringSecurity authUser = AuthorizationService.getAuthentication();
+
+    if(authUser == null) {
+      throw new AccessDeniedException("Acesso negado");
+    }
+
+    List<Task> userTasks = this.taskRepository.findAllByUserId(authUser.getId());
 
     return userTasks.stream().map(this.taskMapper::toDTO).toList();
   }
 
-  public TaskResponseDTO create(@Valid @NotNull TaskCreateDTO task) {
-    // TODO: Buscar por usuário autenticado
-    return this.userRepository.findById("f6094ee7-f8ac-4f4c-9e1b-b0a777e95ff8")
-      .map(recordFound -> {
-        Task newTask = new Task();
-        newTask.setTitle(task.title());
-        newTask.setDescription(task.description());
-        newTask.setPriority(task.priority());
-        newTask.setUser(recordFound);
+  public TaskResponseDTO create(@Valid @NotNull TaskCreateDTO task) throws AccessDeniedException {
+    UserSpringSecurity authUser = AuthorizationService.getAuthentication();
 
-        Task createdTask = this.taskRepository.save(newTask);
+    if(authUser == null) {
+      throw new AccessDeniedException("Acesso negado");
+    }
 
-        return this.taskMapper.toDTO(createdTask);
-      }).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+    User user = this.userRepository.findById(authUser.getId())
+      .orElseThrow(() -> new RecordNotFoundException("Usuário não encontrado"));
+
+    Task newTask = new Task();
+    newTask.setTitle(task.title());
+    newTask.setDescription(task.description());
+    newTask.setPriority(task.priority());
+    newTask.setUser(user);
+
+    Task createdTask = this.taskRepository.save(newTask);
+
+    return this.taskMapper.toDTO(createdTask);
   }
 
-  public TaskResponseDTO findById(@NotNull @NotBlank String id) {
-    /*
-    * TODO: verificar se a task pertence ao usuário autenticado
-    *   - Sugestão: usar o user_id dentro da task para comparar com o usuário autenticado
-    */
-    return this.taskRepository.findById(id)
-      .map(this.taskMapper::toDTO)
-      .orElseThrow(() -> new RuntimeException("Tarefa não encontrada"));
+  public TaskResponseDTO findById(@NotNull @NotBlank String id) throws AccessDeniedException {
+    UserSpringSecurity authUser = AuthorizationService.getAuthentication();
+
+    if(authUser == null) {
+      throw new AccessDeniedException("Acesso negado");
+    }
+
+    Task task = this.taskRepository.findById(id)
+      .orElseThrow(() -> new RecordNotFoundException("Tarefa não encontrada"));
+
+    if(!task.getUser().getId().equals(authUser.getId())) {
+      throw new AccessDeniedException("Acesso negado");
+    }
+
+    return this.taskMapper.toDTO(task);
   }
 
-  public TaskResponseDTO update(@NotNull @NotBlank String id, @Valid TaskUpdateDTO task) {
-    /*
-    * TODO: Verificar por usuário autenticado
-    *   - Sugestão: Reaproveitar o método findById para buscar a tarefa
-    */
+  public TaskResponseDTO update(@NotNull @NotBlank String id, @Valid TaskUpdateDTO task) throws AccessDeniedException {
+    UserSpringSecurity authUser = AuthorizationService.getAuthentication();
+
+    if(authUser == null) {
+      throw new AccessDeniedException("Acesso negado");
+    }
+
     return this.taskRepository.findById(id)
       .map(taskFound -> {
+        if(!taskFound.getUser().getId().equals(authUser.getId())) {
+          throw new AccessDeniedException("Acesso negado");
+        }
+
         if(task.title() != null) {
           taskFound.setTitle(task.title());
         }
+
         if(task.description() != null) {
           taskFound.setDescription(task.description());
         }
+
         if(task.priority() != null) {
           taskFound.setPriority(task.priority());
         }
+
         if(task.isDone() != null) {
           taskFound.setIsDone(task.isDone());
         }
@@ -87,13 +114,23 @@ public class TaskService {
 
         return this.taskMapper.toDTO(updatedTask);
       })
-      .orElseThrow(() -> new RuntimeException("Tarefa não encontrada!"));
+      .orElseThrow(() -> new RecordNotFoundException("Tarefa não encontrada"));
   }
 
-  public void delete(@NotNull @NotBlank String id) {
-    String taskId = this.taskRepository.findById(id)
-      .map(Task::getId)
-      .orElseThrow(() -> new RuntimeException("Tarefa não encontrada!"));
-    this.taskRepository.deleteById(taskId);
+  public void delete(@NotNull @NotBlank String id) throws AccessDeniedException {
+    UserSpringSecurity authUser = AuthorizationService.getAuthentication();
+
+    if(authUser == null) {
+      throw new AccessDeniedException("Acesso negado");
+    }
+
+    Task task = this.taskRepository.findById(id)
+      .orElseThrow(() -> new RecordNotFoundException("Tarefa não encontrada"));
+
+    if(!task.getUser().getId().equals(authUser.getId())) {
+      throw new AccessDeniedException("Acesso negado");
+    }
+
+    this.taskRepository.deleteById(task.getId());
   }
 }
