@@ -1,18 +1,23 @@
 package com.felipe.todoapi.controllers;
 
+import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.felipe.todoapi.enums.FailureResponseStatus;
 import com.felipe.todoapi.exceptions.RecordNotFoundException;
 import com.felipe.todoapi.exceptions.UserAlreadyExistsException;
 import com.felipe.todoapi.utils.CustomResponseBody;
+import com.felipe.todoapi.utils.CustomValidationErrors;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.List;
 
 @RestControllerAdvice
 public class ApplicationControllerAdvice {
@@ -53,6 +58,18 @@ public class ApplicationControllerAdvice {
     return responseBody;
   }
 
+  @ExceptionHandler(JWTCreationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public CustomResponseBody<Void> handleJWTCreationException(JWTCreationException e) {
+    CustomResponseBody<Void> responseBody = new CustomResponseBody<>();
+    responseBody.setStatus(FailureResponseStatus.ERROR);
+    responseBody.setCode(HttpStatus.BAD_REQUEST);
+    responseBody.setMessage(e.getMessage());
+    responseBody.setData(null);
+
+    return responseBody;
+  }
+
   @ExceptionHandler(AccessDeniedException.class)
   @ResponseStatus(HttpStatus.FORBIDDEN)
   public CustomResponseBody<Void> handleAccessDeniedException(AccessDeniedException e) {
@@ -85,6 +102,29 @@ public class ApplicationControllerAdvice {
     responseBody.setCode(HttpStatus.CONFLICT);
     responseBody.setMessage(e.getMessage());
     responseBody.setData(null);
+
+    return responseBody;
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+  public CustomResponseBody<List<CustomValidationErrors>> handleMethodArgumentNotValidException(
+    MethodArgumentNotValidException e
+  ) {
+    List<CustomValidationErrors> errors = e.getBindingResult()
+      .getFieldErrors()
+      .stream()
+      .map(fieldError -> new CustomValidationErrors(
+        fieldError.getField(),
+        fieldError.getRejectedValue(),
+        fieldError.getDefaultMessage()
+      )).toList();
+
+    CustomResponseBody<List<CustomValidationErrors>> responseBody = new CustomResponseBody<>();
+    responseBody.setStatus(FailureResponseStatus.ERROR);
+    responseBody.setCode(HttpStatus.UNPROCESSABLE_ENTITY);
+    responseBody.setMessage("Erros de validação");
+    responseBody.setData(errors);
 
     return responseBody;
   }
