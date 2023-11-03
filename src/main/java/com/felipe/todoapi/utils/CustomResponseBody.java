@@ -1,8 +1,10 @@
 package com.felipe.todoapi.utils;
 
-import com.felipe.todoapi.enums.ResponseStatus;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.felipe.todoapi.enums.FailureResponseStatus;
 import org.springframework.http.HttpStatus;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CustomResponseBody<T> {
   private String status;
   private Integer code;
@@ -11,7 +13,7 @@ public class CustomResponseBody<T> {
 
   public CustomResponseBody() {}
 
-  public CustomResponseBody(ResponseStatus status, HttpStatus code, String message, T data) {
+  public CustomResponseBody(FailureResponseStatus status, HttpStatus code, String message, T data) {
     this.status = status.getValue();
     this.code = code.value();
     this.message = message;
@@ -22,7 +24,7 @@ public class CustomResponseBody<T> {
     return this.status;
   }
 
-  public void setStatus(ResponseStatus status) {
+  public void setStatus(FailureResponseStatus status) {
     this.status = status.getValue();
   }
 
