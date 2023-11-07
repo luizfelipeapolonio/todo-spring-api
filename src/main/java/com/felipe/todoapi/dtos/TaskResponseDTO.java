@@ -6,7 +6,7 @@ public record TaskResponseDTO(
   String id,
   String title,
   String description,
-  Integer priority,
+  String priority,
   Boolean isDone,
   LocalDateTime createdAt,
   LocalDateTime updatedAt
