@@ -56,7 +56,7 @@ public class TaskService {
     Task newTask = new Task();
     newTask.setTitle(task.title());
     newTask.setDescription(task.description());
-    newTask.setPriority(task.priority());
+    newTask.setPriority(this.taskMapper.convertPriorityLevelValue(task.priority()));
     newTask.setUser(user);
 
     Task createdTask = this.taskRepository.save(newTask);
@@ -103,7 +103,7 @@ public class TaskService {
         }
 
         if(task.priority() != null) {
-          taskFound.setPriority(task.priority());
+          taskFound.setPriority(this.taskMapper.convertPriorityLevelValue(task.priority()));
         }
 
         if(task.isDone() != null) {
