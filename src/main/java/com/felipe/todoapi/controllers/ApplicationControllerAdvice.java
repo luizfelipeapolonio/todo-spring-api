@@ -8,6 +8,7 @@ import com.felipe.todoapi.exceptions.UserAlreadyExistsException;
 import com.felipe.todoapi.utils.CustomResponseBody;
 import com.felipe.todoapi.utils.CustomValidationErrors;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -125,6 +126,30 @@ public class ApplicationControllerAdvice {
     responseBody.setCode(HttpStatus.UNPROCESSABLE_ENTITY);
     responseBody.setMessage("Erros de validação");
     responseBody.setData(errors);
+
+    return responseBody;
+  }
+
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public CustomResponseBody<Void> handleHttpMessageNotReadableException() {
+    CustomResponseBody<Void> responseBody = new CustomResponseBody<>();
+    responseBody.setStatus(FailureResponseStatus.ERROR);
+    responseBody.setCode(HttpStatus.BAD_REQUEST);
+    responseBody.setMessage("O tipo de dado de algum campo provido é inválido ou inconsistente");
+    responseBody.setData(null);
+
+    return responseBody;
+  }
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public CustomResponseBody<Void> handleIllegalArgumentException(IllegalArgumentException e) {
+    CustomResponseBody<Void> responseBody = new CustomResponseBody<>();
+    responseBody.setStatus(FailureResponseStatus.ERROR);
+    responseBody.setCode(HttpStatus.BAD_REQUEST);
+    responseBody.setMessage(e.getMessage());
+    responseBody.setData(null);
 
     return responseBody;
   }
