@@ -1,6 +1,8 @@
 package com.felipe.todoapi.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.felipe.todoapi.enums.PriorityLevel;
+import com.felipe.todoapi.enums.converters.PriorityLevelConverter;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -21,8 +23,9 @@ public class Task {
   @Column(length = 100)
   private String description;
 
-  @Column(nullable = false)
-  private Integer priority;
+  @Convert(converter = PriorityLevelConverter.class)
+  @Column(length = 5, nullable = false)
+  private PriorityLevel priority;
 
   @Column(name = "is_done", nullable = false)
   private Boolean isDone = false;
@@ -66,11 +69,11 @@ public class Task {
     this.description = description;
   }
 
-  public Integer getPriority() {
+  public PriorityLevel getPriority() {
     return this.priority;
   }
 
-  public void setPriority(Integer priority) {
+  public void setPriority(PriorityLevel priority) {
     this.priority = priority;
   }
 
