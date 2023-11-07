@@ -1,6 +1,7 @@
 package com.felipe.todoapi.dtos.mappers;
 
 import com.felipe.todoapi.dtos.TaskResponseDTO;
+import com.felipe.todoapi.enums.PriorityLevel;
 import com.felipe.todoapi.models.Task;
 import org.springframework.stereotype.Component;
 
@@ -16,10 +17,23 @@ public class TaskMapper {
       task.getId(),
       task.getTitle(),
       task.getDescription(),
-      task.getPriority(),
+      task.getPriority().getValue(),
       task.isDone(),
       task.getCreatedAt(),
       task.getUpdatedAt()
     );
+  }
+
+  public PriorityLevel convertPriorityLevelValue(String value) {
+    if(value == null) {
+      return null;
+    }
+
+    return switch(value) {
+      case "baixa" -> PriorityLevel.LOW;
+      case "media" -> PriorityLevel.MEDIUM;
+      case "alta" -> PriorityLevel.HIGH;
+      default -> throw new IllegalArgumentException("Prioridade inválida: " + value);
+    };
   }
 }
