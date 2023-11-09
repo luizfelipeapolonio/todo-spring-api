@@ -9,11 +9,14 @@ import com.felipe.todoapi.utils.CustomResponseBody;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api")
 public class TaskController {
@@ -27,8 +30,12 @@ public class TaskController {
   @GetMapping("/task")
   @ResponseStatus(HttpStatus.OK)
   public CustomResponseBody<List<TaskResponseDTO>> getAllUserTasks(
-    @RequestParam(defaultValue = "createdAt") String field,
-    @RequestParam(defaultValue = "asc") String order
+    @RequestParam(defaultValue = "createdat", name = "field")
+    @Pattern(regexp = "title|priority|createdat|updatedat", message = "Os parâmetros aceitos são: title, priority, createdat, updatedat")
+    String field,
+    @RequestParam(defaultValue = "asc", name = "order")
+    @Pattern(regexp = "asc|desc", message = "Os parâmetros aceitos são: asc, desc")
+    String order
   ) {
     List<TaskResponseDTO> tasks = this.taskService.getAllUserTasks(field, order);
 
