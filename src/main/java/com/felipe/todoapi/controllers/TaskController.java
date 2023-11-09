@@ -26,8 +26,11 @@ public class TaskController {
 
   @GetMapping("/task")
   @ResponseStatus(HttpStatus.OK)
-  public CustomResponseBody<List<TaskResponseDTO>> getAllUserTasks() {
-    List<TaskResponseDTO> tasks = this.taskService.getAllUserTasks();
+  public CustomResponseBody<List<TaskResponseDTO>> getAllUserTasks(
+    @RequestParam(defaultValue = "createdAt") String field,
+    @RequestParam(defaultValue = "asc") String order
+  ) {
+    List<TaskResponseDTO> tasks = this.taskService.getAllUserTasks(field, order);
 
     CustomResponseBody<List<TaskResponseDTO>> responseBody = new CustomResponseBody<>();
     responseBody.setStatus(FailureResponseStatus.SUCCESS);

@@ -13,6 +13,7 @@ import com.felipe.todoapi.repositories.UserRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -31,14 +32,18 @@ public class TaskService {
     this.taskMapper = taskMapper;
   }
 
-  public List<TaskResponseDTO> getAllUserTasks() throws AccessDeniedException {
+  public List<TaskResponseDTO> getAllUserTasks(String field, String order) throws AccessDeniedException {
     UserSpringSecurity authUser = AuthorizationService.getAuthentication();
 
     if(authUser == null) {
       throw new AccessDeniedException("Acesso negado");
     }
 
-    List<Task> userTasks = this.taskRepository.findAllByUserId(authUser.getId());
+    String[] sortFilter = this.getSortFilter(field, order);
+
+    Sort sortOrder = Sort.by(Sort.Direction.fromString(sortFilter[1]), sortFilter[0]);
+
+    List<Task> userTasks = this.taskRepository.findAllByUserId(authUser.getId(), sortOrder);
 
     return userTasks.stream().map(this.taskMapper::toDTO).toList();
   }
@@ -132,5 +137,30 @@ public class TaskService {
     }
 
     this.taskRepository.deleteById(task.getId());
+  }
+
+  private String[] getSortFilter(String field, String order) {
+    String[] sort = new String[2];
+
+    if(field.equalsIgnoreCase("title")) {
+      sort[0] = "title";
+    }
+    if(field.equalsIgnoreCase("priority")) {
+      sort[0] = "priority";
+    }
+    if(field.equalsIgnoreCase("createdAt")) {
+      sort[0] = "createdAt";
+    }
+    if(field.equalsIgnoreCase("updatedAt")) {
+      sort[0] = "updatedAt";
+    }
+
+    if(order.equalsIgnoreCase("asc")) {
+      sort[1] = "ASC";
+    } else {
+      sort[1] = "DESC";
+    }
+
+    return sort;
   }
 }
