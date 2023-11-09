@@ -14,7 +14,7 @@ public class PriorityLevelConverter implements AttributeConverter<PriorityLevel,
     if(priorityLevel == null) {
       return null;
     }
-    return priorityLevel.getValue();
+    return priorityLevel.getLevel();
   }
 
   @Override
@@ -23,7 +23,7 @@ public class PriorityLevelConverter implements AttributeConverter<PriorityLevel,
       return null;
     }
     return Stream.of(PriorityLevel.values())
-      .filter(priorityLevel -> priorityLevel.getValue().equals(value))
+      .filter(priorityLevel -> priorityLevel.getLevel().equals(value))
       .findFirst()
       .orElseThrow(() -> new IllegalArgumentException("Valor de Enum inválido: " + value));
   }
