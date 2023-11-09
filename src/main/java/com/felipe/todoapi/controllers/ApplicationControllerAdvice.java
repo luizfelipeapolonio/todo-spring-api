@@ -7,6 +7,7 @@ import com.felipe.todoapi.exceptions.RecordNotFoundException;
 import com.felipe.todoapi.exceptions.UserAlreadyExistsException;
 import com.felipe.todoapi.utils.CustomResponseBody;
 import com.felipe.todoapi.utils.CustomValidationErrors;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -150,6 +151,26 @@ public class ApplicationControllerAdvice {
     responseBody.setCode(HttpStatus.BAD_REQUEST);
     responseBody.setMessage(e.getMessage());
     responseBody.setData(null);
+
+    return responseBody;
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public CustomResponseBody<List<CustomValidationErrors>> handleConstraintViolationException(ConstraintViolationException e) {
+    List<CustomValidationErrors> errors = e.getConstraintViolations()
+      .stream()
+      .map(constraintViolation -> new CustomValidationErrors(
+        constraintViolation.getPropertyPath().toString().split("\\.")[1],
+        constraintViolation.getInvalidValue(),
+        constraintViolation.getMessageTemplate()
+      )).toList();
+
+    CustomResponseBody<List<CustomValidationErrors>> responseBody = new CustomResponseBody<>();
+    responseBody.setStatus(FailureResponseStatus.ERROR);
+    responseBody.setCode(HttpStatus.BAD_REQUEST);
+    responseBody.setMessage("Erros de restrição");
+    responseBody.setData(errors);
 
     return responseBody;
   }
