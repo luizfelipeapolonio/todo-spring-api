@@ -57,10 +57,12 @@ public class TaskController {
   ) {
     List<TaskResponseDTO> tasks = this.taskService.getAllDoneOrNotDoneTasks(status);
 
+    String message = status.equals("true") ? "Tarefas marcadas como feitas" : "Tarefas marcadas como não feitas";
+
     CustomResponseBody<List<TaskResponseDTO>> responseBody = new CustomResponseBody<>();
     responseBody.setStatus(FailureResponseStatus.SUCCESS);
     responseBody.setCode(HttpStatus.OK);
-    responseBody.setMessage("Tarefas feitas ou não feitas");
+    responseBody.setMessage(message);
     responseBody.setData(tasks);
 
     return responseBody;
