@@ -50,7 +50,7 @@ public class TaskController {
 
   @GetMapping("/task/done")
   @ResponseStatus(HttpStatus.OK)
-  public CustomResponseBody<List<TaskResponseDTO>> getAllDoneOrUndoneTasks(
+  public CustomResponseBody<List<TaskResponseDTO>> getAllDoneOrNotDoneTasks(
     @RequestParam(defaultValue = "true", name = "status")
     @Pattern(regexp = "true|false", message = "Os parâmetros aceitos são: true, false")
     String status
