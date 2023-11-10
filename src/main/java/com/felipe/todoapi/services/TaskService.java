@@ -40,12 +40,23 @@ public class TaskService {
     }
 
     String[] sortFilter = this.getSortFilter(field, order);
-
     Sort sortOrder = Sort.by(Sort.Direction.fromString(sortFilter[1]), sortFilter[0]);
 
     List<Task> userTasks = this.taskRepository.findAllByUserId(authUser.getId(), sortOrder);
 
     return userTasks.stream().map(this.taskMapper::toDTO).toList();
+  }
+
+  public List<TaskResponseDTO> getAllDoneOrNotDoneTasks(String status) throws AccessDeniedException {
+    UserSpringSecurity authUser = AuthorizationService.getAuthentication();
+
+    if(authUser == null) {
+      throw new AccessDeniedException("Acesso negado");
+    }
+
+    List<Task> tasks = this.taskRepository.findAllDoneOrNotDone(authUser.getId(), Boolean.parseBoolean(status));
+
+    return tasks.stream().map(this.taskMapper::toDTO).toList();
   }
 
   public TaskResponseDTO create(@Valid @NotNull TaskCreateDTO task) throws AccessDeniedException {

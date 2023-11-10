@@ -48,6 +48,24 @@ public class TaskController {
     return responseBody;
   }
 
+  @GetMapping("/task/done")
+  @ResponseStatus(HttpStatus.OK)
+  public CustomResponseBody<List<TaskResponseDTO>> getAllDoneOrUndoneTasks(
+    @RequestParam(defaultValue = "true", name = "status")
+    @Pattern(regexp = "true|false", message = "Os parâmetros aceitos são: true, false")
+    String status
+  ) {
+    List<TaskResponseDTO> tasks = this.taskService.getAllDoneOrNotDoneTasks(status);
+
+    CustomResponseBody<List<TaskResponseDTO>> responseBody = new CustomResponseBody<>();
+    responseBody.setStatus(FailureResponseStatus.SUCCESS);
+    responseBody.setCode(HttpStatus.OK);
+    responseBody.setMessage("Tarefas feitas ou não feitas");
+    responseBody.setData(tasks);
+
+    return responseBody;
+  }
+
   @PostMapping("/task")
   @ResponseStatus(HttpStatus.CREATED)
   public CustomResponseBody<TaskResponseDTO> create(@RequestBody @Valid @NotNull TaskCreateDTO task) {
