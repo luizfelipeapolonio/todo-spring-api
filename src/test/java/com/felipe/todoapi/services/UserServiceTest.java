@@ -2,6 +2,7 @@ package com.felipe.todoapi.services;
 
 import com.felipe.todoapi.dtos.UserRegisterDTO;
 import com.felipe.todoapi.dtos.UserResponseDTO;
+import com.felipe.todoapi.exceptions.UserAlreadyExistsException;
 import com.felipe.todoapi.infra.security.TokenService;
 import com.felipe.todoapi.models.User;
 import com.felipe.todoapi.repositories.UserRepository;
@@ -17,6 +18,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.catchException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -73,5 +75,27 @@ public class UserServiceTest {
 
     verify(this.userRepository, times(1)).findByEmail(userDTO.email());
     verify(this.userRepository, times(1)).save(any(User.class));
+  }
+
+  @Test
+  @DisplayName("Should throw a UserAlreadyExistsException when attempt to register a user that already exists")
+  void userRegisterFailWithAnExistentUser() throws UserAlreadyExistsException {
+    UserRegisterDTO userDTO = new UserRegisterDTO("User 1", "teste1@email.com", "123456");
+
+    User user = new User();
+    user.setId("01");
+    user.setName(userDTO.name());
+    user.setEmail(userDTO.email());
+    user.setPassword(userDTO.password());
+
+    when(this.userRepository.findByEmail(userDTO.email())).thenReturn(Optional.of(user));
+
+    Exception thrown = catchException(() -> this.userService.register(userDTO));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(UserAlreadyExistsException.class)
+      .hasMessage("E-mail já cadastrado!");
+
+    verify(this.userRepository, times(1)).findByEmail(userDTO.email());
   }
 }
