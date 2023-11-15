@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
@@ -28,6 +29,8 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 
 public class UserServiceTest {
 
@@ -132,5 +135,23 @@ public class UserServiceTest {
     verify(this.authenticationManager, times(1)).authenticate(usernamePassword);
     verify(this.tokenService, times(1)).generateToken(any());
     verify(this.userRepository, times(1)).findByEmail(loginData.email());
+  }
+
+  @Test
+  @DisplayName("Should throw a BadCredentialsException when login attempt fails due to invalid credentials")
+  void userLoginFailByBadCredentials() throws BadCredentialsException {
+    LoginDTO loginData = new LoginDTO("teste1@email.com", "123456");
+
+    doThrow(BadCredentialsException.class).when(this.authenticationManager).authenticate(any());
+
+    Exception thrown = catchException(() -> this.userService.login(loginData));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(BadCredentialsException.class)
+      .hasMessage("Usuário ou senha inválidos");
+
+    verify(this.authenticationManager, times(1)).authenticate(any());
+    verify(this.tokenService, never()).generateToken(any());
+    verify(this.userRepository, never()).findByEmail(any());
   }
 }
