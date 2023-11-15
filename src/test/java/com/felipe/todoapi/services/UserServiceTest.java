@@ -4,6 +4,7 @@ import com.felipe.todoapi.dtos.LoginDTO;
 import com.felipe.todoapi.dtos.LoginResponseDTO;
 import com.felipe.todoapi.dtos.UserRegisterDTO;
 import com.felipe.todoapi.dtos.UserResponseDTO;
+import com.felipe.todoapi.exceptions.RecordNotFoundException;
 import com.felipe.todoapi.exceptions.UserAlreadyExistsException;
 import com.felipe.todoapi.infra.security.TokenService;
 import com.felipe.todoapi.models.User;
@@ -153,5 +154,25 @@ public class UserServiceTest {
     verify(this.authenticationManager, times(1)).authenticate(any());
     verify(this.tokenService, never()).generateToken(any());
     verify(this.userRepository, never()).findByEmail(any());
+  }
+
+  @Test
+  @DisplayName("Should throw a RecordNotFoundException when provided email does not exist")
+  void userLoginFailByNotFoundUser() {
+    LoginDTO loginData = new LoginDTO("teste1@email.com", "123456");
+
+    when(this.authenticationManager.authenticate(any())).thenReturn(this.authentication);
+    when(this.tokenService.generateToken(any())).thenReturn("AccessToken");
+    when(this.userRepository.findByEmail(loginData.email())).thenReturn(Optional.empty());
+
+    Exception thrown = catchException(() -> this.userService.login(loginData));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(RecordNotFoundException.class)
+      .hasMessage("Usuário não encontrado");
+
+    verify(this.userRepository, times(1)).findByEmail(loginData.email());
+    verify(this.authenticationManager, times(1)).authenticate(any());
+    verify(this.tokenService, times(1)).generateToken(any());
   }
 }
