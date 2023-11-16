@@ -168,7 +168,7 @@ public class UserServiceTest {
 
   @Test
   @DisplayName("Should throw a RecordNotFoundException when provided email does not exist")
-  void userLoginFailByNotFoundUser() {
+  void userLoginFailByNotFoundUser() throws RecordNotFoundException {
     LoginDTO loginData = new LoginDTO("teste1@email.com", "123456");
 
     when(this.authenticationManager.authenticate(any())).thenReturn(this.authentication);
@@ -216,7 +216,7 @@ public class UserServiceTest {
 
   @Test
   @DisplayName("Should throw an AccessDeniedException when authenticated user returns null")
-  void getAuthUserProfileFailByNullAuthUser() {
+  void getAuthUserProfileFailByNullAuthUser() throws AccessDeniedException {
     when(this.authentication.getPrincipal()).thenReturn(null);
     when(this.securityContext.getAuthentication()).thenReturn(this.authentication);
 
@@ -235,7 +235,7 @@ public class UserServiceTest {
 
   @Test
   @DisplayName("Should throw an AccessDeniedException when the provided ID is different from the authenticated user's ID")
-  void getAuthUserProfileFailByDifferentUserId() {
+  void getAuthUserProfileFailByDifferentUserId() throws AccessDeniedException {
     UserSpringSecurity authUser = new UserSpringSecurity("01", "teste1@email.com", "123456");
 
     when(this.authentication.getPrincipal()).thenReturn(authUser);
@@ -251,5 +251,26 @@ public class UserServiceTest {
 
     verify(this.securityContext, times(1)).getAuthentication();
     verify(this.userRepository, never()).findById(anyString());
+  }
+
+  @Test
+  @DisplayName("Should throw a RecordNotFoundException when the provided ID does not exist")
+  void getAuthUserProfileFailByNotFoundUser() throws RecordNotFoundException {
+    UserSpringSecurity authUser = new UserSpringSecurity("01", "teste1@email.com", "123456");
+
+    when(this.authentication.getPrincipal()).thenReturn(authUser);
+    when(this.securityContext.getAuthentication()).thenReturn(this.authentication);
+    when(this.userRepository.findById(anyString())).thenReturn(Optional.empty());
+
+    SecurityContextHolder.setContext(this.securityContext);
+
+    Exception thrown = catchException(() -> this.userService.getAuthUserProfile("01"));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(RecordNotFoundException.class)
+      .hasMessage("Usuário não encontrado!");
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.userRepository, times(1)).findById(anyString());
   }
 }
