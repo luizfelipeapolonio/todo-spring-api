@@ -232,4 +232,24 @@ public class UserServiceTest {
     verify(this.securityContext, times(1)).getAuthentication();
     verify(this.userRepository, never()).findById(anyString());
   }
+
+  @Test
+  @DisplayName("Should throw an AccessDeniedException when the provided ID is different from the authenticated user's ID")
+  void getAuthUserProfileFailByDifferentUserId() {
+    UserSpringSecurity authUser = new UserSpringSecurity("01", "teste1@email.com", "123456");
+
+    when(this.authentication.getPrincipal()).thenReturn(authUser);
+    when(this.securityContext.getAuthentication()).thenReturn(this.authentication);
+
+    SecurityContextHolder.setContext(this.securityContext);
+
+    Exception thrown = catchException(() -> this.userService.getAuthUserProfile("02"));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(AccessDeniedException.class)
+      .hasMessage("Acesso negado!");
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.userRepository, never()).findById(anyString());
+  }
 }
