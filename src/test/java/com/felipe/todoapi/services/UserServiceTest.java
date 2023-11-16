@@ -7,6 +7,7 @@ import com.felipe.todoapi.dtos.UserResponseDTO;
 import com.felipe.todoapi.exceptions.RecordNotFoundException;
 import com.felipe.todoapi.exceptions.UserAlreadyExistsException;
 import com.felipe.todoapi.infra.security.TokenService;
+import com.felipe.todoapi.infra.security.UserSpringSecurity;
 import com.felipe.todoapi.models.User;
 import com.felipe.todoapi.repositories.UserRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -21,6 +22,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 
@@ -32,6 +35,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.eq;
 
 public class UserServiceTest {
 
@@ -43,6 +47,9 @@ public class UserServiceTest {
 
   @Mock
   Authentication authentication;
+
+  @Mock
+  SecurityContext securityContext;
 
   @Mock
   TokenService tokenService;
@@ -61,6 +68,7 @@ public class UserServiceTest {
   @AfterEach
   void tearDown() throws Exception {
     this.closable.close();
+    SecurityContextHolder.clearContext();
   }
 
   @Test
@@ -174,5 +182,33 @@ public class UserServiceTest {
     verify(this.userRepository, times(1)).findByEmail(loginData.email());
     verify(this.authenticationManager, times(1)).authenticate(any());
     verify(this.tokenService, times(1)).generateToken(any());
+  }
+
+  @Test
+  @DisplayName("Should return authenticated user profile information")
+  void getAuthUserProfileSuccess() {
+    User user = new User();
+    user.setId("01");
+    user.setName("User 1");
+    user.setEmail("teste1@email.com");
+    user.setPassword("123456");
+
+    UserSpringSecurity authUser = new UserSpringSecurity(user.getId(), user.getEmail(), user.getPassword());
+
+    when(this.authentication.getPrincipal()).thenReturn(authUser);
+    when(this.securityContext.getAuthentication()).thenReturn(this.authentication);
+    when(this.userRepository.findById(eq("01"))).thenReturn(Optional.of(user));
+
+    SecurityContextHolder.setContext(this.securityContext);
+
+    UserResponseDTO authUserProfile = this.userService.getAuthUserProfile(user.getId());
+
+    assertThat(AuthorizationService.getAuthentication().getUsername()).isEqualTo(authUser.getUsername());
+    assertThat(authUserProfile.id()).isEqualTo(authUser.getId());
+    assertThat(authUserProfile.name()).isEqualTo(user.getName());
+    assertThat(authUserProfile.email()).isEqualTo(authUser.getUsername());
+    assertThat(authUserProfile.createdAt()).isEqualTo(user.getCreatedAt());
+
+    verify(this.userRepository, times(1)).findById(eq("01"));
   }
 }
