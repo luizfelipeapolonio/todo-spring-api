@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,6 +37,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.anyString;
 
 public class UserServiceTest {
 
@@ -210,5 +212,24 @@ public class UserServiceTest {
     assertThat(authUserProfile.createdAt()).isEqualTo(user.getCreatedAt());
 
     verify(this.userRepository, times(1)).findById(eq("01"));
+  }
+
+  @Test
+  @DisplayName("Should throw an AccessDeniedException when authenticated user returns null")
+  void getAuthUserProfileFailByNullAuthUser() {
+    when(this.authentication.getPrincipal()).thenReturn(null);
+    when(this.securityContext.getAuthentication()).thenReturn(this.authentication);
+
+    SecurityContextHolder.setContext(this.securityContext);
+
+    Exception thrown = catchException(() -> this.userService.getAuthUserProfile("01"));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(AccessDeniedException.class)
+      .hasMessage("Acesso negado!");
+    assertThat(this.authentication.getPrincipal()).isNull();
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.userRepository, never()).findById(anyString());
   }
 }
