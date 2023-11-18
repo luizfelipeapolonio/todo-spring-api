@@ -34,6 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.anyBoolean;
 
 
 public class TaskServiceTest {
@@ -131,6 +132,21 @@ public class TaskServiceTest {
 
     verify(this.securityContext, times(1)).getAuthentication();
     verify(this.taskRepository, times(1)).findAllDoneOrNotDone(user.getId(), false);
+  }
+
+  @Test
+  @DisplayName("Should throw an AccessDeniedException when the authenticated user returns null")
+  void getAllDoneOrNotDoneTasksFailByNullAuthUser() throws AccessDeniedException {
+    this.mockAuthentication(null);
+
+    Exception thrown = catchException(() -> this.taskService.getAllDoneOrNotDoneTasks("false"));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(AccessDeniedException.class)
+      .hasMessage("Acesso negado");
+
+    verify(this.taskRepository, never()).findAllDoneOrNotDone(anyString(), anyBoolean());
+    verify(this.securityContext, times(1)).getAuthentication();
   }
 
   private void mockAuthentication(UserSpringSecurity authUser) {
