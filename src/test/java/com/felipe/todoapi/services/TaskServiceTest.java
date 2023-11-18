@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -43,7 +44,7 @@ public class TaskServiceTest {
   @Mock
   UserRepository userRepository;
 
-  @Mock
+  @Spy
   TaskMapper taskMapper;
 
   @Mock
@@ -105,6 +106,31 @@ public class TaskServiceTest {
 
     verify(this.taskRepository, never()).findAllByUserId(anyString(), any());
     verify(this.securityContext, times(1)).getAuthentication();
+  }
+
+  @Test
+  @DisplayName("Should return all done or not done tasks of authenticated user")
+  void getAllDoneOrNotDoneTasksSuccess() {
+    User user = new User();
+    user.setId("01");
+    user.setName("User 1");
+    user.setEmail("teste1@email.com");
+    user.setPassword("123456");
+
+    UserSpringSecurity authUser = new UserSpringSecurity(user.getId(), user.getEmail(), user.getPassword());
+    List<Task> tasks = this.generateTaskList(user);
+
+    this.mockAuthentication(authUser);
+    when(this.taskRepository.findAllDoneOrNotDone(user.getId(), false)).thenReturn(tasks);
+
+    List<TaskResponseDTO> userTasks = this.taskService.getAllDoneOrNotDoneTasks("false");
+
+    assertThat(userTasks).allSatisfy(taskResponseDTO -> {
+      assertThat(taskResponseDTO.isDone()).isEqualTo(false);
+    }).hasSize(3);
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.taskRepository, times(1)).findAllDoneOrNotDone(user.getId(), false);
   }
 
   private void mockAuthentication(UserSpringSecurity authUser) {
