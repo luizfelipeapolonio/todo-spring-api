@@ -1,0 +1,129 @@
+package com.felipe.todoapi.services;
+
+import com.felipe.todoapi.dtos.TaskResponseDTO;
+import com.felipe.todoapi.dtos.mappers.TaskMapper;
+import com.felipe.todoapi.enums.PriorityLevel;
+import com.felipe.todoapi.infra.security.UserSpringSecurity;
+import com.felipe.todoapi.models.Task;
+import com.felipe.todoapi.models.User;
+import com.felipe.todoapi.repositories.TaskRepository;
+import com.felipe.todoapi.repositories.UserRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+
+public class TaskServiceTest {
+
+  @Mock
+  TaskRepository taskRepository;
+
+  @Mock
+  UserRepository userRepository;
+
+  @Mock
+  TaskMapper taskMapper;
+
+  @Mock
+  Authentication authentication;
+
+  @Mock
+  SecurityContext securityContext;
+
+  @Autowired
+  @InjectMocks
+  TaskService taskService;
+
+  private AutoCloseable closable;
+
+  @BeforeEach
+  void setUp() {
+    this.closable = MockitoAnnotations.openMocks(this);
+  }
+
+  @AfterEach
+  void tearDown() throws Exception {
+    this.closable.close();
+    SecurityContextHolder.clearContext();
+  }
+
+  @Test
+  @DisplayName("Should return a task list with all tasks that belong to the authenticated user")
+  void getAllUserTasksSuccess() {
+    User user = new User();
+    user.setId("01");
+    user.setName("User 1");
+    user.setEmail("teste1@email.com");
+    user.setPassword("123456");
+
+    UserSpringSecurity authUser = new UserSpringSecurity(user.getId(), user.getEmail(), user.getPassword());
+    List<Task> tasks = this.generateTaskList(user);
+
+    this.mockAuthentication(authUser);
+    when(this.taskRepository.findAllByUserId(eq(authUser.getId()), any())).thenReturn(tasks);
+
+    List<TaskResponseDTO> userTasks = this.taskService.getAllUserTasks("priority", "desc");
+
+    assertThat(userTasks).hasSize(3);
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.taskRepository, times(1)).findAllByUserId(eq(authUser.getId()), any());
+  }
+
+  private void mockAuthentication(UserSpringSecurity authUser) {
+    when(this.authentication.getPrincipal()).thenReturn(authUser);
+    when(this.securityContext.getAuthentication()).thenReturn(this.authentication);
+    SecurityContextHolder.setContext(this.securityContext);
+  }
+
+  private List<Task> generateTaskList(User user) {
+    List<Task> tasks = new ArrayList<>();
+
+    Task task1 = new Task();
+    task1.setId("01");
+    task1.setTitle("Tarefa 1");
+    task1.setDescription("Descrição tarefa 1");
+    task1.setPriority(PriorityLevel.LOW);
+    task1.setIsDone(false);
+    task1.setUser(user);
+
+    Task task2 = new Task();
+    task2.setId("02");
+    task2.setTitle("Tarefa 2");
+    task2.setDescription("Descrição tarefa 2");
+    task2.setPriority(PriorityLevel.MEDIUM);
+    task2.setIsDone(false);
+    task2.setUser(user);
+
+    Task task3 = new Task();
+    task3.setId("03");
+    task3.setTitle("Tarefa 3");
+    task3.setDescription("Descrição tarefa 3");
+    task3.setPriority(PriorityLevel.HIGH);
+    task3.setIsDone(false);
+    task3.setUser(user);
+
+    tasks.add(task1);
+    tasks.add(task2);
+    tasks.add(task3);
+
+    return tasks;
+  }
+}
