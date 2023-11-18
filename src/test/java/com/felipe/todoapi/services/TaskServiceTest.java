@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,11 +25,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchException;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.anyString;
+
 
 public class TaskServiceTest {
 
@@ -85,6 +90,21 @@ public class TaskServiceTest {
 
     verify(this.securityContext, times(1)).getAuthentication();
     verify(this.taskRepository, times(1)).findAllByUserId(eq(authUser.getId()), any());
+  }
+
+  @Test
+  @DisplayName("Should throw an AccessDeniedException when the authenticated user returns null")
+  void getAllUserTasksFailByNullAuthUser() throws AccessDeniedException {
+    this.mockAuthentication(null);
+
+    Exception thrown = catchException(() -> this.taskService.getAllUserTasks("priority", "desc"));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(AccessDeniedException.class)
+      .hasMessage("Acesso negado");
+
+    verify(this.taskRepository, never()).findAllByUserId(anyString(), any());
+    verify(this.securityContext, times(1)).getAuthentication();
   }
 
   private void mockAuthentication(UserSpringSecurity authUser) {
