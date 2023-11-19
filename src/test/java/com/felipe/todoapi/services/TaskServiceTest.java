@@ -4,6 +4,7 @@ import com.felipe.todoapi.dtos.TaskCreateDTO;
 import com.felipe.todoapi.dtos.TaskResponseDTO;
 import com.felipe.todoapi.dtos.mappers.TaskMapper;
 import com.felipe.todoapi.enums.PriorityLevel;
+import com.felipe.todoapi.exceptions.RecordNotFoundException;
 import com.felipe.todoapi.infra.security.UserSpringSecurity;
 import com.felipe.todoapi.models.Task;
 import com.felipe.todoapi.models.User;
@@ -208,6 +209,27 @@ public class TaskServiceTest {
     verify(this.userRepository, never()).findById(anyString());
     verify(this.taskRepository, never()).save(any(Task.class));
     verify(this.securityContext, times(1)).getAuthentication();
+  }
+
+  @Test
+  @DisplayName("Should throw a RecordNotFoundException when the user does not exist")
+  void createTaskFailByNotFoundUser() {
+    TaskCreateDTO taskDTO = new TaskCreateDTO("Task 1", "Descrição task 1", "baixa");
+
+    UserSpringSecurity authUser = new UserSpringSecurity("01", "teste1@email.com", "123456");
+
+    this.mockAuthentication(authUser);
+    when(this.userRepository.findById(authUser.getId())).thenReturn(Optional.empty());
+
+    Exception thrown = catchException(() -> this.taskService.create(taskDTO));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(RecordNotFoundException.class)
+      .hasMessage("Usuário não encontrado");
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.userRepository, times(1)).findById(authUser.getId());
+    verify(this.taskRepository, never()).save(any(Task.class));
   }
 
   private void mockAuthentication(UserSpringSecurity authUser) {
