@@ -1,5 +1,6 @@
 package com.felipe.todoapi.services;
 
+import com.felipe.todoapi.dtos.TaskCreateDTO;
 import com.felipe.todoapi.dtos.TaskResponseDTO;
 import com.felipe.todoapi.dtos.mappers.TaskMapper;
 import com.felipe.todoapi.enums.PriorityLevel;
@@ -24,6 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchException;
@@ -147,6 +149,47 @@ public class TaskServiceTest {
 
     verify(this.taskRepository, never()).findAllDoneOrNotDone(anyString(), anyBoolean());
     verify(this.securityContext, times(1)).getAuthentication();
+  }
+
+  @Test
+  @DisplayName("Should successfully create a task and return it")
+  void createTaskSuccess() {
+    User user = new User();
+    user.setId("01");
+    user.setName("User 1");
+    user.setEmail("teste1@email.com");
+    user.setPassword("123456");
+
+    TaskCreateDTO taskDTO = new TaskCreateDTO("Task 1", "Descrição task 1", "baixa");
+
+    Task newTask = new Task();
+    newTask.setId("01");
+    newTask.setTitle(taskDTO.title());
+    newTask.setDescription(taskDTO.description());
+    newTask.setPriority(this.taskMapper.convertPriorityLevelValue(taskDTO.priority()));
+    newTask.setIsDone(false);
+    newTask.setUser(user);
+
+    UserSpringSecurity authUser = new UserSpringSecurity(user.getId(), user.getEmail(), user.getPassword());
+
+    this.mockAuthentication(authUser);
+    when(this.userRepository.findById(authUser.getId())).thenReturn(Optional.of(user));
+    when(this.taskRepository.save(any(Task.class))).thenReturn(newTask);
+
+    TaskResponseDTO createdTask = this.taskService.create(taskDTO);
+
+    assertThat(createdTask.id()).isEqualTo(newTask.getId());
+    assertThat(createdTask.title()).isEqualTo(newTask.getTitle());
+    assertThat(createdTask.description()).isEqualTo(newTask.getDescription());
+    assertThat(createdTask.priority()).isEqualTo(newTask.getPriority().getValue());
+    assertThat(createdTask.isDone()).isEqualTo(newTask.isDone());
+    assertThat(createdTask.createdAt()).isEqualTo(newTask.getCreatedAt());
+    assertThat(createdTask.updatedAt()).isEqualTo(newTask.getUpdatedAt());
+    assertThat(newTask.getUser().getId()).isEqualTo(authUser.getId());
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.userRepository, times(1)).findById(authUser.getId());
+    verify(this.taskRepository, times(1)).save(any(Task.class));
   }
 
   private void mockAuthentication(UserSpringSecurity authUser) {
