@@ -192,6 +192,24 @@ public class TaskServiceTest {
     verify(this.taskRepository, times(1)).save(any(Task.class));
   }
 
+  @Test
+  @DisplayName("Should throw an AccessDeniedException when the authenticated user returns null")
+  void createTaskFailByNullAuthUser() throws AccessDeniedException {
+    TaskCreateDTO taskDTO = new TaskCreateDTO("Task 1", "Descrição task 1", "baixa");
+
+    this.mockAuthentication(null);
+
+    Exception thrown = catchException(() -> this.taskService.create(taskDTO));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(AccessDeniedException.class)
+      .hasMessage("Acesso negado");
+
+    verify(this.userRepository, never()).findById(anyString());
+    verify(this.taskRepository, never()).save(any(Task.class));
+    verify(this.securityContext, times(1)).getAuthentication();
+  }
+
   private void mockAuthentication(UserSpringSecurity authUser) {
     when(this.authentication.getPrincipal()).thenReturn(authUser);
     when(this.securityContext.getAuthentication()).thenReturn(this.authentication);
