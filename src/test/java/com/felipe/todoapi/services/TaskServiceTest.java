@@ -403,6 +403,29 @@ public class TaskServiceTest {
     verify(this.taskRepository, times(1)).save(task);
   }
 
+  @Test
+  @DisplayName("Should throw an AccessDeniedException when the authenticated user returns null")
+  void updateTaskFailByNullAuthUser() throws AccessDeniedException {
+    TaskUpdateDTO taskUpdateDTO = new TaskUpdateDTO(
+      "Tarefa 1 atualizada",
+      "Descrição 1 atualizada",
+      "media",
+      true
+    );
+
+    this.mockAuthentication(null);
+
+    Exception thrown = catchException(() -> this.taskService.update("01", taskUpdateDTO));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(AccessDeniedException.class)
+      .hasMessage("Acesso negado");
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.taskRepository, never()).findById(anyString());
+    verify(this.taskRepository, never()).save(any(Task.class));
+  }
+
   private List<Task> generateTaskList(User user) {
     List<Task> tasks = new ArrayList<>();
 
