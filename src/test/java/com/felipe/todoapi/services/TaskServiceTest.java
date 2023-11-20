@@ -540,6 +540,39 @@ public class TaskServiceTest {
     verify(this.taskRepository, never()).deleteById(anyString());
   }
 
+  @Test
+  @DisplayName("Should throw an AccessDeniedException when the task's user ID is different from the authenticated user ID")
+  void deleteTaskFailByInvalidTaskUserId() throws AccessDeniedException {
+    UserSpringSecurity authUser = new UserSpringSecurity("01", "teste1@email.com", "123456");
+
+    User user = new User();
+    user.setId("02");
+    user.setName("User 2");
+    user.setEmail("teste2@email.com");
+    user.setPassword("123456");
+
+    Task task = new Task();
+    task.setId("01");
+    task.setTitle("Tarefa 1");
+    task.setDescription("Descrição 1");
+    task.setPriority(PriorityLevel.LOW);
+    task.setIsDone(false);
+    task.setUser(user);
+
+    this.mockAuthentication(authUser);
+    when(this.taskRepository.findById(task.getId())).thenReturn(Optional.of(task));
+
+    Exception thrown = catchException(() -> this.taskService.delete("01"));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(AccessDeniedException.class)
+      .hasMessage("Acesso negado");
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.taskRepository, times(1)).findById(task.getId());
+    verify(this.taskRepository, never()).deleteById(anyString());
+  }
+
   private List<Task> generateTaskList(User user) {
     List<Task> tasks = new ArrayList<>();
 
