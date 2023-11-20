@@ -291,6 +291,45 @@ public class TaskServiceTest {
     verify(this.taskMapper, never()).toDTO(any(Task.class));
   }
 
+  @Test
+  @DisplayName("Should throw an AccessDeniedException when the task's user ID is different from the authenticated user ID")
+  void findTaskByIdFailByInvalidTaskUserId() throws AccessDeniedException {
+    User user = new User();
+    user.setId("01");
+    user.setName("User 1");
+    user.setEmail("teste1@email.com");
+    user.setPassword("123456");
+
+    User user2 = new User();
+    user2.setId("02");
+    user2.setName("User 2");
+    user2.setEmail("teste2@email.com");
+    user.setPassword("123456");
+
+    UserSpringSecurity authUser = new UserSpringSecurity(user.getId(), user.getEmail(), user.getPassword());
+
+    Task task = new Task();
+    task.setId("01");
+    task.setTitle("Tarefa 1");
+    task.setDescription("Descrição 1");
+    task.setPriority(PriorityLevel.LOW);
+    task.setIsDone(true);
+    task.setUser(user2);
+
+    this.mockAuthentication(authUser);
+    when(this.taskRepository.findById(anyString())).thenReturn(Optional.of(task));
+
+    Exception thrown = catchException(() -> this.taskService.findById("01"));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(AccessDeniedException.class)
+      .hasMessage("Acesso negado");
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.taskRepository, times(1)).findById(anyString());
+    verify(this.taskMapper, never()).toDTO(any(Task.class));
+  }
+
   private List<Task> generateTaskList(User user) {
     List<Task> tasks = new ArrayList<>();
 
