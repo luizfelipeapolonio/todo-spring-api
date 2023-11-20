@@ -31,6 +31,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
@@ -39,7 +40,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.anyBoolean;
-
+import static org.mockito.Mockito.doNothing;
 
 public class TaskServiceTest {
 
@@ -490,6 +491,37 @@ public class TaskServiceTest {
     verify(this.securityContext, times(1)).getAuthentication();
     verify(this.taskRepository, times(1)).findById(anyString());
     verify(this.taskRepository, never()).save(any(Task.class));
+  }
+
+  @Test
+  @DisplayName("Should delete a task successfully and not throw any exceptions")
+  void deleteTaskSuccess() {
+    User user = new User();
+    user.setId("01");
+    user.setName("User 1");
+    user.setEmail("teste1@email.com");
+    user.setPassword("123456");
+
+    UserSpringSecurity authUser = new UserSpringSecurity(user.getId(), user.getEmail(), user.getPassword());
+
+    Task task = new Task();
+    task.setId("01");
+    task.setTitle("Tarefa 1");
+    task.setDescription("Descrição 1");
+    task.setPriority(PriorityLevel.LOW);
+    task.setIsDone(false);
+    task.setUser(user);
+
+    this.mockAuthentication(authUser);
+    when(this.taskRepository.findById(task.getId())).thenReturn(Optional.of(task));
+    doNothing().when(this.taskRepository).deleteById(task.getId());
+
+    assertThat(task.getUser().getId()).isEqualTo(authUser.getId());
+    assertThatNoException().isThrownBy(() -> this.taskService.delete("01"));
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.taskRepository, times(1)).findById(task.getId());
+    verify(this.taskRepository, times(1)).deleteById(task.getId());
   }
 
   private List<Task> generateTaskList(User user) {
