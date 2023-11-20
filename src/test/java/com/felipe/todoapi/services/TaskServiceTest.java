@@ -2,6 +2,7 @@ package com.felipe.todoapi.services;
 
 import com.felipe.todoapi.dtos.TaskCreateDTO;
 import com.felipe.todoapi.dtos.TaskResponseDTO;
+import com.felipe.todoapi.dtos.TaskUpdateDTO;
 import com.felipe.todoapi.dtos.mappers.TaskMapper;
 import com.felipe.todoapi.enums.PriorityLevel;
 import com.felipe.todoapi.exceptions.RecordNotFoundException;
@@ -347,6 +348,59 @@ public class TaskServiceTest {
     verify(this.securityContext, times(1)).getAuthentication();
     verify(this.taskRepository, times(1)).findById(anyString());
     verify(this.taskMapper, never()).toDTO(any(Task.class));
+  }
+
+  @Test
+  @DisplayName("Should update a task and return it")
+  void updateTaskSuccess() {
+    User user = new User();
+    user.setId("01");
+    user.setName("User 1");
+    user.setEmail("teste1@email.com");
+    user.setPassword("123456");
+
+    UserSpringSecurity authUser = new UserSpringSecurity(user.getId(), user.getEmail(), user.getPassword());
+
+    Task task = new Task();
+    task.setId("01");
+    task.setTitle("Tarefa 1");
+    task.setDescription("Descrição 1");
+    task.setPriority(PriorityLevel.LOW);
+    task.setIsDone(false);
+    task.setUser(user);
+
+    TaskUpdateDTO taskUpdateDTO = new TaskUpdateDTO(
+      "Tarefa 1 atualizada",
+      "Descrição 1 atualizada",
+      "media",
+      true
+    );
+
+    Task updatedTask = new Task();
+    updatedTask.setId("01");
+    updatedTask.setTitle("Tarefa 1 atualizada");
+    updatedTask.setDescription("Descrição 1 atualizada");
+    updatedTask.setPriority(PriorityLevel.MEDIUM);
+    updatedTask.setIsDone(true);
+    updatedTask.setUser(user);
+
+    this.mockAuthentication(authUser);
+    when(this.taskRepository.findById(task.getId())).thenReturn(Optional.of(task));
+    when(this.taskRepository.save(task)).thenReturn(task);
+
+    TaskResponseDTO updatedTaskReturned = this.taskService.update("01", taskUpdateDTO);
+
+    assertThat(task.getUser().getId()).isEqualTo(authUser.getId());
+    assertThat(updatedTaskReturned.id()).isEqualTo(updatedTask.getId());
+    assertThat(updatedTaskReturned.title()).isEqualTo(updatedTask.getTitle());
+    assertThat(updatedTaskReturned.description()).isEqualTo(updatedTask.getDescription());
+    assertThat(updatedTaskReturned.priority()).isEqualTo(updatedTask.getPriority().getValue());
+    assertThat(updatedTaskReturned.isDone()).isEqualTo(updatedTask.isDone());
+    assertThat(updatedTaskReturned.createdAt()).isEqualTo(task.getUpdatedAt());
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.taskRepository, times(1)).findById(task.getId());
+    verify(this.taskRepository, times(1)).save(task);
   }
 
   private List<Task> generateTaskList(User user) {
