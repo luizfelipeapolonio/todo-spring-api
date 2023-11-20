@@ -466,6 +466,32 @@ public class TaskServiceTest {
     verify(this.taskRepository, never()).save(any(Task.class));
   }
 
+  @Test
+  @DisplayName("Should throw a RecordNotFoundException when the task does not exist")
+  void updateTaskFailByTaskNotFound() throws RecordNotFoundException {
+    UserSpringSecurity authUser = new UserSpringSecurity("01", "teste1@email.com", "123456");
+
+    TaskUpdateDTO taskUpdateDTO = new TaskUpdateDTO(
+      "Tarefa 1 atualizada",
+      "Descrição 1 atualizada",
+      "media",
+      true
+    );
+
+    this.mockAuthentication(authUser);
+    when(this.taskRepository.findById(anyString())).thenReturn(Optional.empty());
+
+    Exception thrown = catchException(() -> this.taskService.update("01", taskUpdateDTO));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(RecordNotFoundException.class)
+      .hasMessage("Tarefa não encontrada");
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.taskRepository, times(1)).findById(anyString());
+    verify(this.taskRepository, never()).save(any(Task.class));
+  }
+
   private List<Task> generateTaskList(User user) {
     List<Task> tasks = new ArrayList<>();
 
