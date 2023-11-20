@@ -524,6 +524,22 @@ public class TaskServiceTest {
     verify(this.taskRepository, times(1)).deleteById(task.getId());
   }
 
+  @Test
+  @DisplayName("Should throw an AccessDeniedException when the authenticated user returns null")
+  void deleteTaskFailByNullAuthUser() throws AccessDeniedException {
+    this.mockAuthentication(null);
+
+    Exception thrown = catchException(() -> this.taskService.delete("01"));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(AccessDeniedException.class)
+      .hasMessage("Acesso negado");
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.taskRepository, never()).findById(anyString());
+    verify(this.taskRepository, never()).deleteById(anyString());
+  }
+
   private List<Task> generateTaskList(User user) {
     List<Task> tasks = new ArrayList<>();
 
