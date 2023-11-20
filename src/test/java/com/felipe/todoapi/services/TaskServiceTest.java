@@ -213,7 +213,7 @@ public class TaskServiceTest {
 
   @Test
   @DisplayName("Should throw a RecordNotFoundException when the user does not exist")
-  void createTaskFailByNotFoundUser() {
+  void createTaskFailByNotFoundUser() throws RecordNotFoundException {
     TaskCreateDTO taskDTO = new TaskCreateDTO("Task 1", "Descrição task 1", "baixa");
 
     UserSpringSecurity authUser = new UserSpringSecurity("01", "teste1@email.com", "123456");
@@ -236,6 +236,43 @@ public class TaskServiceTest {
     when(this.authentication.getPrincipal()).thenReturn(authUser);
     when(this.securityContext.getAuthentication()).thenReturn(this.authentication);
     SecurityContextHolder.setContext(this.securityContext);
+  }
+
+  @Test
+  @DisplayName("Should return a task according to the provided task ID")
+  void findTaskByIdSuccess() {
+    User user = new User();
+    user.setId("01");
+    user.setName("User 1");
+    user.setEmail("teste1@email.com");
+    user.setPassword("123456");
+
+    UserSpringSecurity authUser = new UserSpringSecurity(user.getId(), user.getEmail(), user.getPassword());
+
+    Task task = new Task();
+    task.setId("01");
+    task.setTitle("Tarefa 1");
+    task.setDescription("Descrição tarefa 1");
+    task.setPriority(PriorityLevel.MEDIUM);
+    task.setIsDone(false);
+    task.setUser(user);
+
+    this.mockAuthentication(authUser);
+    when(this.taskRepository.findById(anyString())).thenReturn(Optional.of(task));
+
+    TaskResponseDTO taskFound = this.taskService.findById("01");
+
+    assertThat(taskFound.id()).isEqualTo(task.getId());
+    assertThat(taskFound.title()).isEqualTo(task.getTitle());
+    assertThat(taskFound.description()).isEqualTo(task.getDescription());
+    assertThat(taskFound.priority()).isEqualTo(task.getPriority().getValue());
+    assertThat(taskFound.isDone()).isEqualTo(task.isDone());
+    assertThat(taskFound.createdAt()).isEqualTo(task.getCreatedAt());
+    assertThat(taskFound.updatedAt()).isEqualTo(task.getUpdatedAt());
+    assertThat(task.getUser().getId()).isEqualTo(authUser.getId());
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.taskRepository, times(1)).findById(anyString());
   }
 
   private List<Task> generateTaskList(User user) {
