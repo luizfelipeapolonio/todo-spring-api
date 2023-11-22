@@ -1,6 +1,8 @@
 package com.felipe.todoapi.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.felipe.todoapi.dtos.LoginDTO;
+import com.felipe.todoapi.dtos.LoginResponseDTO;
 import com.felipe.todoapi.dtos.UserRegisterDTO;
 import com.felipe.todoapi.dtos.UserResponseDTO;
 import com.felipe.todoapi.enums.FailureResponseStatus;
@@ -36,10 +38,10 @@ public class UserControllerTest {
   UserService userService;
 
   @Autowired
-  private MockMvc mockMvc;
+  MockMvc mockMvc;
 
   @Autowired
-  private ObjectMapper objectMapper;
+  ObjectMapper objectMapper;
 
   private String baseUrl;
   private LocalDateTime mockDateTime;
@@ -106,5 +108,34 @@ public class UserControllerTest {
       .andExpect(jsonPath("$.message").value("E-mail já cadastrado!"));
 
     verify(this.userService, times(1)).register(any(UserRegisterDTO.class));
+  }
+
+  @Test
+  @DisplayName("Should log user in successfully and return a success response with the user info and an access token")
+  void userLoginSuccess() throws Exception {
+    LoginDTO loginData = new LoginDTO("teste1@email.com", "123456");
+    LoginResponseDTO loggedInUser = new LoginResponseDTO(
+      "01",
+      "User 1",
+      loginData.email(),
+      "AccessToken"
+    );
+    String jsonBody = this.objectMapper.writeValueAsString(loginData);
+
+    when(this.userService.login(loginData)).thenReturn(loggedInUser);
+
+    this.mockMvc.perform(post(this.baseUrl + "/auth/login")
+      .contentType(MediaType.APPLICATION_JSON).content(jsonBody)
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.SUCCESS.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.OK.value()))
+      .andExpect(jsonPath("$.message").value("Usuário logado com sucesso"))
+      .andExpect(jsonPath("$.data.id").value(loggedInUser.id()))
+      .andExpect(jsonPath("$.data.name").value(loggedInUser.name()))
+      .andExpect(jsonPath("$.data.email").value(loggedInUser.email()))
+      .andExpect(jsonPath("$.data.token").value(loggedInUser.token()));
+
+    verify(this.userService, times(1)).login(loginData);
   }
 }
