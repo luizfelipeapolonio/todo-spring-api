@@ -24,6 +24,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
@@ -69,5 +71,19 @@ public class UserControllerTest {
       .andExpect(jsonPath("$.data.createdAt").value(createdUser.createdAt().toString()));
 
     verify(this.userService, times(1)).register(user);
+  }
+
+  @Test
+  @DisplayName("Should return an error response with a bad request status code if the request body is not sent")
+  void registerUserFailByNullRequestBody() throws Exception {
+    this.mockMvc.perform(post(this.baseUrl + "/auth/register")
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
+      .andExpect(jsonPath("$.message").value("O tipo de dado de algum campo provido é inválido ou inconsistente"));
+
+    verify(this.userService, never()).register(any(UserRegisterDTO.class));
   }
 }
