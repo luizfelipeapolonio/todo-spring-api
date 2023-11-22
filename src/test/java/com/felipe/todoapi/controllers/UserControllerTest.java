@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.todoapi.dtos.UserRegisterDTO;
 import com.felipe.todoapi.dtos.UserResponseDTO;
 import com.felipe.todoapi.enums.FailureResponseStatus;
+import com.felipe.todoapi.exceptions.UserAlreadyExistsException;
 import com.felipe.todoapi.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -85,5 +86,25 @@ public class UserControllerTest {
       .andExpect(jsonPath("$.message").value("O tipo de dado de algum campo provido é inválido ou inconsistente"));
 
     verify(this.userService, never()).register(any(UserRegisterDTO.class));
+  }
+
+  @Test
+  @DisplayName("Should return an error response with a conflict status code if user already exists")
+  void registerUserFailByExistentUser() throws Exception {
+    UserRegisterDTO userDTO = new UserRegisterDTO("User 1", "teste1@email.com", "123456");
+    String jsonBody = this.objectMapper.writeValueAsString(userDTO);
+
+    when(this.userService.register(any(UserRegisterDTO.class)))
+      .thenThrow(new UserAlreadyExistsException("E-mail já cadastrado!"));
+
+    this.mockMvc.perform(post(this.baseUrl + "/auth/register")
+      .contentType(MediaType.APPLICATION_JSON).content(jsonBody)
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isConflict())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.CONFLICT.value()))
+      .andExpect(jsonPath("$.message").value("E-mail já cadastrado!"));
+
+    verify(this.userService, times(1)).register(any(UserRegisterDTO.class));
   }
 }
