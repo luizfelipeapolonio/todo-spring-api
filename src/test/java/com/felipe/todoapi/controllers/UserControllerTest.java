@@ -6,6 +6,7 @@ import com.felipe.todoapi.dtos.LoginResponseDTO;
 import com.felipe.todoapi.dtos.UserRegisterDTO;
 import com.felipe.todoapi.dtos.UserResponseDTO;
 import com.felipe.todoapi.enums.FailureResponseStatus;
+import com.felipe.todoapi.exceptions.RecordNotFoundException;
 import com.felipe.todoapi.exceptions.UserAlreadyExistsException;
 import com.felipe.todoapi.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -97,7 +98,7 @@ public class UserControllerTest {
     UserRegisterDTO userDTO = new UserRegisterDTO("User 1", "teste1@email.com", "123456");
     String jsonBody = this.objectMapper.writeValueAsString(userDTO);
 
-    when(this.userService.register(any(UserRegisterDTO.class)))
+    when(this.userService.register(userDTO))
       .thenThrow(new UserAlreadyExistsException("E-mail já cadastrado!"));
 
     this.mockMvc.perform(post(this.baseUrl + "/auth/register")
@@ -108,7 +109,7 @@ public class UserControllerTest {
       .andExpect(jsonPath("$.code").value(HttpStatus.CONFLICT.value()))
       .andExpect(jsonPath("$.message").value("E-mail já cadastrado!"));
 
-    verify(this.userService, times(1)).register(any(UserRegisterDTO.class));
+    verify(this.userService, times(1)).register(userDTO);
   }
 
   @Test
@@ -160,7 +161,7 @@ public class UserControllerTest {
     LoginDTO loginData = new LoginDTO("teste1@email.com", "123456");
     String jsonBody = this.objectMapper.writeValueAsString(loginData);
 
-    when(this.userService.login(any(LoginDTO.class)))
+    when(this.userService.login(loginData))
       .thenThrow(new BadCredentialsException("Usuário ou senha inválidos"));
 
     this.mockMvc.perform(post(this.baseUrl + "/auth/login")
@@ -171,6 +172,25 @@ public class UserControllerTest {
       .andExpect(jsonPath("$.code").value(HttpStatus.UNAUTHORIZED.value()))
       .andExpect(jsonPath("$.message").value("Usuário ou senha inválidos"));
 
-    verify(this.userService, times(1)).login(any(LoginDTO.class));
+    verify(this.userService, times(1)).login(loginData);
+  }
+
+  @Test
+  @DisplayName("Should return an error response with a not found status code if the user does not exist")
+  void userLoginFailByUserNotFound() throws Exception {
+    LoginDTO loginData = new LoginDTO("teste1@email.com", "123456");
+    String jsonBody = this.objectMapper.writeValueAsString(loginData);
+
+    when(this.userService.login(loginData)).thenThrow(new RecordNotFoundException("Usuário não encontrado"));
+
+    this.mockMvc.perform(post(this.baseUrl + "/auth/login")
+      .contentType(MediaType.APPLICATION_JSON).content(jsonBody)
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.NOT_FOUND.value()))
+      .andExpect(jsonPath("$.message").value("Usuário não encontrado"));
+
+    verify(this.userService, times(1)).login(loginData);
   }
 }
