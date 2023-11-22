@@ -138,4 +138,18 @@ public class UserControllerTest {
 
     verify(this.userService, times(1)).login(loginData);
   }
+
+  @Test
+  @DisplayName("Should return an error response with a bad request status code if the request body is not sent")
+  void userLoginFailByNullRequestBody() throws Exception {
+    this.mockMvc.perform(post(this.baseUrl + "/auth/login")
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
+      .andExpect(jsonPath("$.message").value("O tipo de dado de algum campo provido é inválido ou inconsistente"));
+
+    verify(this.userService, never()).login(any(LoginDTO.class));
+  }
 }
