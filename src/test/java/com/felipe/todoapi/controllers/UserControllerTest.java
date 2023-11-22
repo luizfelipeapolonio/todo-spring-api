@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -151,5 +152,25 @@ public class UserControllerTest {
       .andExpect(jsonPath("$.message").value("O tipo de dado de algum campo provido é inválido ou inconsistente"));
 
     verify(this.userService, never()).login(any(LoginDTO.class));
+  }
+
+  @Test
+  @DisplayName("Should return an error response with an unauthorized status code due to wrong credentials")
+  void userLoginFailByBadCredentials() throws Exception {
+    LoginDTO loginData = new LoginDTO("teste1@email.com", "123456");
+    String jsonBody = this.objectMapper.writeValueAsString(loginData);
+
+    when(this.userService.login(any(LoginDTO.class)))
+      .thenThrow(new BadCredentialsException("Usuário ou senha inválidos"));
+
+    this.mockMvc.perform(post(this.baseUrl + "/auth/login")
+      .contentType(MediaType.APPLICATION_JSON).content(jsonBody)
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isUnauthorized())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.UNAUTHORIZED.value()))
+      .andExpect(jsonPath("$.message").value("Usuário ou senha inválidos"));
+
+    verify(this.userService, times(1)).login(any(LoginDTO.class));
   }
 }
