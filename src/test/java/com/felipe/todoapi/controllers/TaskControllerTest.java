@@ -1,6 +1,7 @@
 package com.felipe.todoapi.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.felipe.todoapi.dtos.TaskCreateDTO;
 import com.felipe.todoapi.dtos.TaskResponseDTO;
 import com.felipe.todoapi.enums.FailureResponseStatus;
 import com.felipe.todoapi.services.TaskService;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -204,5 +206,33 @@ public class TaskControllerTest {
       .andExpect(jsonPath("$.message").value("Acesso negado"));
 
     verify(this.taskService, times(1)).getAllDoneOrNotDoneTasks(anyString());
+  }
+
+  @Test
+  @DisplayName("Should create a task successfully and return a success response with the created task")
+  void createTaskSuccess() throws Exception {
+    TaskCreateDTO taskData = new TaskCreateDTO("Tarefa 1", "Descrição tarefa 1", "baixa");
+    String jsonBody = this.objectMapper.writeValueAsString(taskData);
+
+    TaskResponseDTO task = this.tasks.get(0);
+
+    when(this.taskService.create(taskData)).thenReturn(task);
+
+    this.mockMvc.perform(post(this.baseUrl)
+      .contentType(MediaType.APPLICATION_JSON).content(jsonBody)
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.SUCCESS.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.CREATED.value()))
+      .andExpect(jsonPath("$.message").value("Tarefa criada com sucesso"))
+      .andExpect(jsonPath("$.data.id").value(task.id()))
+      .andExpect(jsonPath("$.data.title").value(task.title()))
+      .andExpect(jsonPath("$.data.description").value(task.description()))
+      .andExpect(jsonPath("$.data.priority").value(task.priority()))
+      .andExpect(jsonPath("$.data.isDone").value(task.isDone()))
+      .andExpect(jsonPath("$.data.createdAt").value(task.createdAt().toString()))
+      .andExpect(jsonPath("$.data.updatedAt").value(task.updatedAt().toString()));
+
+    verify(this.taskService, times(1)).create(taskData);
   }
 }
