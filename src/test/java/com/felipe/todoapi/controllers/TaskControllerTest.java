@@ -176,4 +176,19 @@ public class TaskControllerTest {
 
     verify(this.taskService, times(1)).getAllDoneOrNotDoneTasks("true");
   }
+
+  @Test
+  @DisplayName("Should return an error response with a bad request status code if the request parameter is invalid")
+  void getAllDoneOrNotDoneTasksFailByInvalidRequestParam() throws Exception {
+    this.mockMvc.perform(get(this.baseUrl + "/done?status=any").accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
+      .andExpect(jsonPath("$.message").value("Erros de restrição"))
+      .andExpect(jsonPath("$.data[0].field").value("status"))
+      .andExpect(jsonPath("$.data[0].rejectedValue").value("any"))
+      .andExpect(jsonPath("$.data[0].message").value("Os parâmetros aceitos são: true, false"));
+
+    verify(this.taskService, never()).getAllDoneOrNotDoneTasks(anyString());
+  }
 }
