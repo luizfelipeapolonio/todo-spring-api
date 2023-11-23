@@ -22,6 +22,8 @@ import java.util.List;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -103,5 +105,29 @@ public class TaskControllerTest {
       .andExpect(jsonPath("$.data[1].updatedAt").value(task2.updatedAt().toString()));
 
     verify(this.taskService, times(1)).getAllUserTasks("createdat", "asc");
+  }
+
+  @Test
+  @DisplayName("Should return an error response with a bad request status code if the request parameters are invalid")
+  void getAllUserTasksFailByInvalidRequestParams() throws Exception {
+    this.mockMvc.perform(get(this.baseUrl + "?field=any").accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
+      .andExpect(jsonPath("$.message").value("Erros de restrição"))
+      .andExpect(jsonPath("$.data[0].field").value("field"))
+      .andExpect(jsonPath("$.data[0].rejectedValue").value("any"))
+      .andExpect(jsonPath("$.data[0].message").value("Os parâmetros aceitos são: title, priority, createdat, updatedat"));
+
+    this.mockMvc.perform(get(this.baseUrl + "?order=any").accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
+      .andExpect(jsonPath("$.message").value("Erros de restrição"))
+      .andExpect(jsonPath("$.data[0].field").value("order"))
+      .andExpect(jsonPath("$.data[0].rejectedValue").value("any"))
+      .andExpect(jsonPath("$.data[0].message").value("Os parâmetros aceitos são: asc, desc"));
+
+    verify(this.taskService, never()).getAllUserTasks(anyString(), anyString());
   }
 }
