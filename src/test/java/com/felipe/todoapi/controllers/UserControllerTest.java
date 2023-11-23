@@ -230,4 +230,18 @@ public class UserControllerTest {
 
     verify(this.userService, times(1)).getAuthUserProfile(anyString());
   }
+
+  @Test
+  @DisplayName("Should return an error response with not found status code if user does not exist")
+  void getAuthUserProfileFailByUserNotFound() throws Exception {
+    when(this.userService.getAuthUserProfile("01")).thenThrow(new RecordNotFoundException("Usuário não encontrado!"));
+
+    this.mockMvc.perform(get(this.baseUrl + "/profile/01").accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.NOT_FOUND.value()))
+      .andExpect(jsonPath("$.message").value("Usuário não encontrado!"));
+
+    verify(this.userService, times(1)).getAuthUserProfile("01");
+  }
 }
