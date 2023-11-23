@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.never;
 
 @SpringBootTest
@@ -202,8 +204,7 @@ public class UserControllerTest {
 
     when(this.userService.getAuthUserProfile("01")).thenReturn(user);
 
-    this.mockMvc.perform(get(this.baseUrl + "/profile/01")
-      .accept(MediaType.APPLICATION_JSON))
+    this.mockMvc.perform(get(this.baseUrl + "/profile/01").accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.SUCCESS.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.OK.value()))
@@ -214,5 +215,19 @@ public class UserControllerTest {
       .andExpect(jsonPath("$.data.createdAt").value(user.createdAt().toString()));
 
     verify(this.userService, times(1)).getAuthUserProfile("01");
+  }
+
+  @Test
+  @DisplayName("Should return an error response with forbidden status code when provided ID is invalid")
+  void getAuthUserProfileFailByAccessDenied() throws Exception {
+    when(this.userService.getAuthUserProfile(anyString())).thenThrow(new AccessDeniedException("Acesso negado!"));
+
+    this.mockMvc.perform(get(this.baseUrl + "/profile/01").accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isForbidden())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.FORBIDDEN.value()))
+      .andExpect(jsonPath("$.message").value("Acesso negado!"));
+
+    verify(this.userService, times(1)).getAuthUserProfile(anyString());
   }
 }
