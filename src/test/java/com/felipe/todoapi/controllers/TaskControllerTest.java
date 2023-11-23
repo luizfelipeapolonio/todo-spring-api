@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -129,5 +130,19 @@ public class TaskControllerTest {
       .andExpect(jsonPath("$.data[0].message").value("Os parâmetros aceitos são: asc, desc"));
 
     verify(this.taskService, never()).getAllUserTasks(anyString(), anyString());
+  }
+
+  @Test
+  @DisplayName("Should return an error response with a forbidden status code due to invalid authentication")
+  void getAllUserTasksFailByAccessDenied() throws Exception {
+    when(this.taskService.getAllUserTasks(anyString(), anyString())).thenThrow(new AccessDeniedException("Acesso negado"));
+
+    this.mockMvc.perform(get(this.baseUrl).accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isForbidden())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.FORBIDDEN.value()))
+      .andExpect(jsonPath("$.message").value("Acesso negado"));
+
+    verify(this.taskService, times(1)).getAllUserTasks(anyString(), anyString());
   }
 }
