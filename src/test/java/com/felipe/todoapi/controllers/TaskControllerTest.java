@@ -191,4 +191,18 @@ public class TaskControllerTest {
 
     verify(this.taskService, never()).getAllDoneOrNotDoneTasks(anyString());
   }
+
+  @Test
+  @DisplayName("Should return an error response with a forbidden status code due to invalid authentication")
+  void getAllDoneOrNotDoneTasksFailByAccessDenied() throws Exception {
+    when(this.taskService.getAllDoneOrNotDoneTasks(anyString())).thenThrow(new AccessDeniedException("Acesso negado"));
+
+    this.mockMvc.perform(get(this.baseUrl + "/done").accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isForbidden())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.FORBIDDEN.value()))
+      .andExpect(jsonPath("$.message").value("Acesso negado"));
+
+    verify(this.taskService, times(1)).getAllDoneOrNotDoneTasks(anyString());
+  }
 }
