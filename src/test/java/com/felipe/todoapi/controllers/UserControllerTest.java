@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.Mockito.when;
@@ -192,5 +193,26 @@ public class UserControllerTest {
       .andExpect(jsonPath("$.message").value("Usuário não encontrado"));
 
     verify(this.userService, times(1)).login(loginData);
+  }
+
+  @Test
+  @DisplayName("Should return a success response with the authenticated user info")
+  void getAuthUserProfileSuccess() throws Exception {
+    UserResponseDTO user = new UserResponseDTO("01", "User 1", "teste1@email.com", this.mockDateTime);
+
+    when(this.userService.getAuthUserProfile("01")).thenReturn(user);
+
+    this.mockMvc.perform(get(this.baseUrl + "/profile/01")
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.SUCCESS.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.OK.value()))
+      .andExpect(jsonPath("$.message").value("Usuário autenticado"))
+      .andExpect(jsonPath("$.data.id").value(user.id()))
+      .andExpect(jsonPath("$.data.name").value(user.name()))
+      .andExpect(jsonPath("$.data.email").value(user.email()))
+      .andExpect(jsonPath("$.data.createdAt").value(user.createdAt().toString()));
+
+    verify(this.userService, times(1)).getAuthUserProfile("01");
   }
 }
