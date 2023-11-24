@@ -289,4 +289,27 @@ public class TaskControllerTest {
 
     verify(this.taskService, times(1)).create(any(TaskCreateDTO.class));
   }
+
+  @Test
+  @DisplayName("findTaskById - Should return a success response with the task found by the provided ID")
+  void findTaskByIdSuccess() throws Exception {
+    TaskResponseDTO task = this.tasks.get(0);
+
+    when(this.taskService.findById("01")).thenReturn(task);
+
+    this.mockMvc.perform(get(this.baseUrl + "/01").accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.SUCCESS.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.OK.value()))
+      .andExpect(jsonPath("$.message").value("Tarefa encontrada"))
+      .andExpect(jsonPath("$.data.id").value(task.id()))
+      .andExpect(jsonPath("$.data.title").value(task.title()))
+      .andExpect(jsonPath("$.data.description").value(task.description()))
+      .andExpect(jsonPath("$.data.priority").value(task.priority()))
+      .andExpect(jsonPath("$.data.isDone").value(task.isDone()))
+      .andExpect(jsonPath("$.data.createdAt").value(task.createdAt().toString()))
+      .andExpect(jsonPath("$.data.updatedAt").value(task.updatedAt().toString()));
+
+    verify(this.taskService, times(1)).findById("01");
+  }
 }
