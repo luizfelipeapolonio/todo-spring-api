@@ -312,4 +312,18 @@ public class TaskControllerTest {
 
     verify(this.taskService, times(1)).findById("01");
   }
+
+  @Test
+  @DisplayName("findTaskById - Should return an error response with a forbidden status code due to invalid authentication")
+  void findTaskByIdFailByAccessDenied() throws Exception {
+    when(this.taskService.findById(anyString())).thenThrow(new AccessDeniedException("Acesso negado"));
+
+    this.mockMvc.perform(get(this.baseUrl + "/01").accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isForbidden())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.FORBIDDEN.value()))
+      .andExpect(jsonPath("$.message").value("Acesso negado"));
+
+    verify(this.taskService, times(1)).findById(anyString());
+  }
 }
