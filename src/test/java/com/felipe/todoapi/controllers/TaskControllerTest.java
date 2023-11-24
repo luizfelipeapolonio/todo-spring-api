@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.todoapi.dtos.TaskCreateDTO;
 import com.felipe.todoapi.dtos.TaskResponseDTO;
 import com.felipe.todoapi.enums.FailureResponseStatus;
+import com.felipe.todoapi.exceptions.RecordNotFoundException;
 import com.felipe.todoapi.services.TaskService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -265,6 +266,26 @@ public class TaskControllerTest {
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.FORBIDDEN.value()))
       .andExpect(jsonPath("$.message").value("Acesso negado"));
+
+    verify(this.taskService, times(1)).create(any(TaskCreateDTO.class));
+  }
+
+  @Test
+  @DisplayName("createTask - Should return an error response with a not found status code when the task owner is not found")
+  void createTaskFailByAuthUserNotFound() throws Exception {
+    TaskCreateDTO taskData = new TaskCreateDTO("Tarefa 1", "Descrição tarefa 1", "baixa");
+    String jsonBody = this.objectMapper.writeValueAsString(taskData);
+
+    when(this.taskService.create(any(TaskCreateDTO.class)))
+      .thenThrow(new RecordNotFoundException("Usuário não encontrado"));
+
+    this.mockMvc.perform(post(this.baseUrl)
+      .contentType(MediaType.APPLICATION_JSON).content(jsonBody)
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.NOT_FOUND.value()))
+      .andExpect(jsonPath("$.message").value("Usuário não encontrado"));
 
     verify(this.taskService, times(1)).create(any(TaskCreateDTO.class));
   }
