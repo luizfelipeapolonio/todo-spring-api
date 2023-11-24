@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -234,5 +235,18 @@ public class TaskControllerTest {
       .andExpect(jsonPath("$.data.updatedAt").value(task.updatedAt().toString()));
 
     verify(this.taskService, times(1)).create(taskData);
+  }
+
+  @Test
+  @DisplayName("Should return an error response with bad request status code if the request body is null")
+  void createTaskFailByNullRequestBody() throws Exception {
+    this.mockMvc.perform(post(this.baseUrl)
+      .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
+      .andExpect(jsonPath("$.message").value("O tipo de dado de algum campo provido é inválido ou inconsistente"));
+
+    verify(this.taskService, never()).create(any(TaskCreateDTO.class));
   }
 }
