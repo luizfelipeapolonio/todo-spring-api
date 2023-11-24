@@ -3,6 +3,7 @@ package com.felipe.todoapi.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felipe.todoapi.dtos.TaskCreateDTO;
 import com.felipe.todoapi.dtos.TaskResponseDTO;
+import com.felipe.todoapi.dtos.TaskUpdateDTO;
 import com.felipe.todoapi.enums.FailureResponseStatus;
 import com.felipe.todoapi.exceptions.RecordNotFoundException;
 import com.felipe.todoapi.services.TaskService;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -339,5 +341,45 @@ public class TaskControllerTest {
       .andExpect(jsonPath("$.message").value("Tarefa não encontrada"));
 
     verify(this.taskService, times(1)).findById("01");
+  }
+
+  @Test
+  @DisplayName("updateTask - Should return a success response with the updated task")
+  void updateTaskSuccess() throws Exception {
+    TaskUpdateDTO task = new TaskUpdateDTO(
+      "Tarefa 1 atualizada",
+      "Descrição 1 autalizada",
+      "media",
+      true
+    );
+    String jsonBody = this.objectMapper.writeValueAsString(task);
+    TaskResponseDTO updatedTask = new TaskResponseDTO(
+      "03",
+      task.title(),
+      task.description(),
+      task.priority(),
+      task.isDone(),
+      LocalDateTime.parse("2023-11-21T12:00:00.123456"),
+      LocalDateTime.parse("2023-11-21T12:00:00.123456")
+    );
+
+    when(this.taskService.update("03", task)).thenReturn(updatedTask);
+
+    this.mockMvc.perform(patch(this.baseUrl + "/03")
+      .contentType(MediaType.APPLICATION_JSON).content(jsonBody)
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.SUCCESS.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.OK.value()))
+      .andExpect(jsonPath("$.message").value("Tarefa atualizada com sucesso"))
+      .andExpect(jsonPath("$.data.id").value(updatedTask.id()))
+      .andExpect(jsonPath("$.data.title").value(updatedTask.title()))
+      .andExpect(jsonPath("$.data.description").value(updatedTask.description()))
+      .andExpect(jsonPath("$.data.priority").value(updatedTask.priority()))
+      .andExpect(jsonPath("$.data.isDone").value(updatedTask.isDone()))
+      .andExpect(jsonPath("$.data.createdAt").value(updatedTask.createdAt().toString()))
+      .andExpect(jsonPath("$.data.updatedAt").value(updatedTask.updatedAt().toString()));
+
+    verify(this.taskService, times(1)).update("03", task);
   }
 }
