@@ -81,7 +81,7 @@ public class TaskControllerTest {
   }
 
   @Test
-  @DisplayName("Should return a success response with all authenticated user tasks")
+  @DisplayName("getAllUserTasks - Should return a success response with all authenticated user tasks")
   void getAllUserTasksSuccess() throws Exception {
     when(this.taskService.getAllUserTasks("createdat", "asc")).thenReturn(this.tasks);
 
@@ -112,7 +112,7 @@ public class TaskControllerTest {
   }
 
   @Test
-  @DisplayName("Should return an error response with a bad request status code if the request parameters are invalid")
+  @DisplayName("getAllUserTasks - Should return an error response with a bad request status code if the request parameters are invalid")
   void getAllUserTasksFailByInvalidRequestParams() throws Exception {
     this.mockMvc.perform(get(this.baseUrl + "?field=any").accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isBadRequest())
@@ -136,7 +136,7 @@ public class TaskControllerTest {
   }
 
   @Test
-  @DisplayName("Should return an error response with a forbidden status code due to invalid authentication")
+  @DisplayName("getAllUserTasks - Should return an error response with a forbidden status code due to invalid authentication")
   void getAllUserTasksFailByAccessDenied() throws Exception {
     when(this.taskService.getAllUserTasks(anyString(), anyString())).thenThrow(new AccessDeniedException("Acesso negado"));
 
@@ -150,7 +150,7 @@ public class TaskControllerTest {
   }
 
   @Test
-  @DisplayName("Should return a success response with all done or not done user tasks")
+  @DisplayName("getAllDoneOrNotDoneTasks - Should return a success response with all done or not done user tasks")
   void getAllDoneOrNotDoneTasksSuccess() throws Exception {
     when(this.taskService.getAllDoneOrNotDoneTasks("true")).thenReturn(this.tasks);
 
@@ -181,7 +181,7 @@ public class TaskControllerTest {
   }
 
   @Test
-  @DisplayName("Should return an error response with a bad request status code if the request parameter is invalid")
+  @DisplayName("getAllDoneOrNotDoneTasks - Should return an error response with a bad request status code if the request parameter is invalid")
   void getAllDoneOrNotDoneTasksFailByInvalidRequestParam() throws Exception {
     this.mockMvc.perform(get(this.baseUrl + "/done?status=any").accept(MediaType.APPLICATION_JSON))
       .andExpect(status().isBadRequest())
@@ -196,7 +196,7 @@ public class TaskControllerTest {
   }
 
   @Test
-  @DisplayName("Should return an error response with a forbidden status code due to invalid authentication")
+  @DisplayName("getAllDoneOrNotDoneTasks - Should return an error response with a forbidden status code due to invalid authentication")
   void getAllDoneOrNotDoneTasksFailByAccessDenied() throws Exception {
     when(this.taskService.getAllDoneOrNotDoneTasks(anyString())).thenThrow(new AccessDeniedException("Acesso negado"));
 
@@ -210,7 +210,7 @@ public class TaskControllerTest {
   }
 
   @Test
-  @DisplayName("Should create a task successfully and return a success response with the created task")
+  @DisplayName("createTask - Should create a task successfully and return a success response with the created task")
   void createTaskSuccess() throws Exception {
     TaskCreateDTO taskData = new TaskCreateDTO("Tarefa 1", "Descrição tarefa 1", "baixa");
     String jsonBody = this.objectMapper.writeValueAsString(taskData);
@@ -238,7 +238,7 @@ public class TaskControllerTest {
   }
 
   @Test
-  @DisplayName("Should return an error response with bad request status code if the request body is null")
+  @DisplayName("createTask - Should return an error response with bad request status code if the request body is null")
   void createTaskFailByNullRequestBody() throws Exception {
     this.mockMvc.perform(post(this.baseUrl)
       .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
@@ -248,5 +248,24 @@ public class TaskControllerTest {
       .andExpect(jsonPath("$.message").value("O tipo de dado de algum campo provido é inválido ou inconsistente"));
 
     verify(this.taskService, never()).create(any(TaskCreateDTO.class));
+  }
+
+  @Test
+  @DisplayName("createTask - Should return an error response with a forbidden status code due to invalid authentication")
+  void createTaskFailByAccessDenied() throws Exception {
+    TaskCreateDTO taskData = new TaskCreateDTO("Tarefa 1", "Descrição tarefa 1", "baixa");
+    String jsonBody = this.objectMapper.writeValueAsString(taskData);
+
+    when(this.taskService.create(any(TaskCreateDTO.class))).thenThrow(new AccessDeniedException("Acesso negado"));
+
+    this.mockMvc.perform(post(this.baseUrl)
+      .contentType(MediaType.APPLICATION_JSON).content(jsonBody)
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isForbidden())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.FORBIDDEN.value()))
+      .andExpect(jsonPath("$.message").value("Acesso negado"));
+
+    verify(this.taskService, times(1)).create(any(TaskCreateDTO.class));
   }
 }
