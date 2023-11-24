@@ -326,4 +326,18 @@ public class TaskControllerTest {
 
     verify(this.taskService, times(1)).findById(anyString());
   }
+
+  @Test
+  @DisplayName("findTaskById - Should return an error response with a not found status code when the task is not found")
+  void findTaskByIdFailByTaskNotFound() throws Exception {
+    when(this.taskService.findById("01")).thenThrow(new RecordNotFoundException("Tarefa não encontrada"));
+
+    this.mockMvc.perform(get(this.baseUrl + "/01").accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.NOT_FOUND.value()))
+      .andExpect(jsonPath("$.message").value("Tarefa não encontrada"));
+
+    verify(this.taskService, times(1)).findById("01");
+  }
 }
