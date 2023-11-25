@@ -39,11 +39,6 @@ public class UserService {
     this.tokenService = tokenService;
   }
 
-  // ******** REMOVER ********
-  public List<User> list() {
-    return this.userRepository.findAll();
-  }
-
   public UserResponseDTO register(@Valid @NotNull UserRegisterDTO user) throws UserAlreadyExistsException {
     if(this.userRepository.findByEmail(user.email()).isPresent()) {
       throw new UserAlreadyExistsException("E-mail já cadastrado!");

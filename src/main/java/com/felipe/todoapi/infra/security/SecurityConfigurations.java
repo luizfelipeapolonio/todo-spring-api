@@ -37,7 +37,6 @@ public class SecurityConfigurations {
       .authorizeHttpRequests(authorize -> authorize
         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-        .requestMatchers(HttpMethod.GET, "/api/auth/users").permitAll() // ***REMOVER***
         .anyRequest().authenticated()
       )
       .exceptionHandling(exception -> exception

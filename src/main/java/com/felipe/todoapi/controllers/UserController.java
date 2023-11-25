@@ -5,7 +5,6 @@ import com.felipe.todoapi.dtos.LoginResponseDTO;
 import com.felipe.todoapi.dtos.UserRegisterDTO;
 import com.felipe.todoapi.dtos.UserResponseDTO;
 import com.felipe.todoapi.enums.FailureResponseStatus;
-import com.felipe.todoapi.models.User;
 import com.felipe.todoapi.services.UserService;
 import com.felipe.todoapi.utils.CustomResponseBody;
 import jakarta.validation.Valid;
@@ -24,22 +23,6 @@ public class UserController {
 
   public UserController(UserService userService) {
     this.userService = userService;
-  }
-
-  // TODO: ******** REMOVER ********
-  //  - Formato certo das respostas da API
-  @GetMapping("/auth/users")
-  @ResponseStatus(HttpStatus.OK)
-  public CustomResponseBody<List<User>> test() {
-    List<User> users = this.userService.list();
-
-    CustomResponseBody<List<User>> responseBody = new CustomResponseBody<>();
-    responseBody.setStatus(FailureResponseStatus.SUCCESS);
-    responseBody.setCode(HttpStatus.OK);
-    responseBody.setMessage("Todos os usuários");
-    responseBody.setData(users);
-
-    return responseBody;
   }
 
   @PostMapping("/auth/register")
