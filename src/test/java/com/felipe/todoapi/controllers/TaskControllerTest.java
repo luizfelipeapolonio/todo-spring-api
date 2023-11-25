@@ -30,9 +30,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -456,5 +458,20 @@ public class TaskControllerTest {
       .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.taskService, times(1)).update(eq("03"), any(TaskUpdateDTO.class));
+  }
+
+  @Test
+  @DisplayName("deleteTask - Should delete a task successfully and return a success response")
+  void deleteTaskSuccess() throws Exception {
+    doNothing().when(this.taskService).delete("03");
+
+    this.mockMvc.perform(delete(this.baseUrl + "/03").accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.SUCCESS.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.OK.value()))
+      .andExpect(jsonPath("$.message").value("Tarefa excluída com sucesso"))
+      .andExpect(jsonPath("$.data").doesNotExist());
+
+    verify(this.taskService, times(1)).delete("03");
   }
 }
