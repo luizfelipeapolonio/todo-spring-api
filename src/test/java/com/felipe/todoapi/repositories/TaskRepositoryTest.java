@@ -28,7 +28,7 @@ public class TaskRepositoryTest {
   TaskRepository taskRepository;
 
   @Test
-  @DisplayName("Should return all tasks belonging to the given user id")
+  @DisplayName("findAllTasksByUserId - Should return all tasks belonging to the given user id")
   void findAllTasksByUserId() {
     User user1 = this.createUser(new UserRegisterDTO("User 1","teste1@email.com","123456"));
     User user2 = this.createUser(new UserRegisterDTO("User 2","teste2@email.com","123456"));
@@ -45,7 +45,7 @@ public class TaskRepositoryTest {
   }
 
   @Test
-  @DisplayName("Should return all tasks done or not done belonging to the given user id, according to the given task status")
+  @DisplayName("findAllDoneOrNotDoneTasks - Should return all tasks done or not done belonging to the given user id, according to the given task status")
   void findAllDoneOrNotDoneTasksByUserId() {
     User user1 = this.createUser(new UserRegisterDTO("User 1","teste1@email.com","123456"));
     User user2 = this.createUser(new UserRegisterDTO("User 2","teste2@email.com","123456"));

@@ -74,7 +74,7 @@ public class UserServiceTest {
   }
 
   @Test
-  @DisplayName("Should successfully create a user if it doesn't already exist and return it")
+  @DisplayName("userRegister - Should successfully create a user if it doesn't already exist and return it")
   void userRegisterSuccess() {
     UserRegisterDTO userDTO = new UserRegisterDTO("User 1", "teste1@email.com", "123456");
 
@@ -99,7 +99,7 @@ public class UserServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw a UserAlreadyExistsException when attempt to register a user that already exists")
+  @DisplayName("userRegister - Should throw a UserAlreadyExistsException when attempt to register a user that already exists")
   void userRegisterFailWithAnExistentUser() throws UserAlreadyExistsException {
     UserRegisterDTO userDTO = new UserRegisterDTO("User 1", "teste1@email.com", "123456");
 
@@ -121,7 +121,7 @@ public class UserServiceTest {
   }
 
   @Test
-  @DisplayName("Should log user in and return the logged in user info and an access token")
+  @DisplayName("userLogin - Should log user in and return the logged in user info and an access token")
   void userLoginSuccess() {
     LoginDTO loginData = new LoginDTO("teste1@email.com", "123456");
     Authentication usernamePassword = new UsernamePasswordAuthenticationToken(loginData.email(), loginData.password());
@@ -149,7 +149,7 @@ public class UserServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw a BadCredentialsException when login attempt fails due to invalid credentials")
+  @DisplayName("userLogin - Should throw a BadCredentialsException when login attempt fails due to invalid credentials")
   void userLoginFailByBadCredentials() throws BadCredentialsException {
     LoginDTO loginData = new LoginDTO("teste1@email.com", "123456");
 
@@ -167,7 +167,7 @@ public class UserServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw a RecordNotFoundException when provided email does not exist")
+  @DisplayName("userLogin - Should throw a RecordNotFoundException when provided email does not exist")
   void userLoginFailByNotFoundUser() throws RecordNotFoundException {
     LoginDTO loginData = new LoginDTO("teste1@email.com", "123456");
 
@@ -187,7 +187,7 @@ public class UserServiceTest {
   }
 
   @Test
-  @DisplayName("Should return authenticated user profile information")
+  @DisplayName("getAuthUserProfile - Should return authenticated user profile information")
   void getAuthUserProfileSuccess() {
     User user = new User();
     user.setId("01");
@@ -215,7 +215,7 @@ public class UserServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw an AccessDeniedException when authenticated user returns null")
+  @DisplayName("getAuthUserProfile - Should throw an AccessDeniedException when authenticated user returns null")
   void getAuthUserProfileFailByNullAuthUser() throws AccessDeniedException {
     when(this.authentication.getPrincipal()).thenReturn(null);
     when(this.securityContext.getAuthentication()).thenReturn(this.authentication);
@@ -234,7 +234,7 @@ public class UserServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw an AccessDeniedException when the provided ID is different from the authenticated user's ID")
+  @DisplayName("getAuthUserProfile - Should throw an AccessDeniedException when the provided ID is different from the authenticated user's ID")
   void getAuthUserProfileFailByDifferentUserId() throws AccessDeniedException {
     UserSpringSecurity authUser = new UserSpringSecurity("01", "teste1@email.com", "123456");
 
@@ -254,7 +254,7 @@ public class UserServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw a RecordNotFoundException when the provided ID does not exist")
+  @DisplayName("getAuthUserProfile - Should throw a RecordNotFoundException when the provided ID does not exist")
   void getAuthUserProfileFailByNotFoundUser() throws RecordNotFoundException {
     UserSpringSecurity authUser = new UserSpringSecurity("01", "teste1@email.com", "123456");
 

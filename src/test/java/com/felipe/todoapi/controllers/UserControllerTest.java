@@ -58,7 +58,7 @@ public class UserControllerTest {
   }
 
   @Test
-  @DisplayName("Should register a user successfully and return it")
+  @DisplayName("registerUser - Should register a user successfully and return it")
   void registerUserSuccess() throws Exception {
     UserRegisterDTO user = new UserRegisterDTO("User 1", "teste1@email.com", "123456");
     UserResponseDTO createdUser = new UserResponseDTO("01", user.name(), user.email(), this.mockDateTime);
@@ -82,7 +82,7 @@ public class UserControllerTest {
   }
 
   @Test
-  @DisplayName("Should return an error response with a bad request status code if the request body is not sent")
+  @DisplayName("registerUser - Should return an error response with a bad request status code if the request body is not sent")
   void registerUserFailByNullRequestBody() throws Exception {
     this.mockMvc.perform(post(this.baseUrl + "/auth/register")
       .contentType(MediaType.APPLICATION_JSON)
@@ -90,13 +90,14 @@ public class UserControllerTest {
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
-      .andExpect(jsonPath("$.message").value("O tipo de dado de algum campo provido é inválido ou inconsistente"));
+      .andExpect(jsonPath("$.message").value("O tipo de dado de algum campo provido é inválido ou inconsistente"))
+      .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.userService, never()).register(any(UserRegisterDTO.class));
   }
 
   @Test
-  @DisplayName("Should return an error response with a conflict status code if user already exists")
+  @DisplayName("registerUser - Should return an error response with a conflict status code if user already exists")
   void registerUserFailByExistentUser() throws Exception {
     UserRegisterDTO userDTO = new UserRegisterDTO("User 1", "teste1@email.com", "123456");
     String jsonBody = this.objectMapper.writeValueAsString(userDTO);
@@ -110,13 +111,14 @@ public class UserControllerTest {
       .andExpect(status().isConflict())
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.CONFLICT.value()))
-      .andExpect(jsonPath("$.message").value("E-mail já cadastrado!"));
+      .andExpect(jsonPath("$.message").value("E-mail já cadastrado!"))
+      .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.userService, times(1)).register(userDTO);
   }
 
   @Test
-  @DisplayName("Should log user in successfully and return a success response with the user info and an access token")
+  @DisplayName("userLogin - Should log user in successfully and return a success response with the user info and an access token")
   void userLoginSuccess() throws Exception {
     LoginDTO loginData = new LoginDTO("teste1@email.com", "123456");
     LoginResponseDTO loggedInUser = new LoginResponseDTO(
@@ -145,7 +147,7 @@ public class UserControllerTest {
   }
 
   @Test
-  @DisplayName("Should return an error response with a bad request status code if the request body is not sent")
+  @DisplayName("userLogin - Should return an error response with a bad request status code if the request body is not sent")
   void userLoginFailByNullRequestBody() throws Exception {
     this.mockMvc.perform(post(this.baseUrl + "/auth/login")
       .contentType(MediaType.APPLICATION_JSON)
@@ -153,13 +155,14 @@ public class UserControllerTest {
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
-      .andExpect(jsonPath("$.message").value("O tipo de dado de algum campo provido é inválido ou inconsistente"));
+      .andExpect(jsonPath("$.message").value("O tipo de dado de algum campo provido é inválido ou inconsistente"))
+      .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.userService, never()).login(any(LoginDTO.class));
   }
 
   @Test
-  @DisplayName("Should return an error response with an unauthorized status code due to wrong credentials")
+  @DisplayName("userLogin - Should return an error response with an unauthorized status code due to wrong credentials")
   void userLoginFailByBadCredentials() throws Exception {
     LoginDTO loginData = new LoginDTO("teste1@email.com", "123456");
     String jsonBody = this.objectMapper.writeValueAsString(loginData);
@@ -173,13 +176,14 @@ public class UserControllerTest {
       .andExpect(status().isUnauthorized())
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.UNAUTHORIZED.value()))
-      .andExpect(jsonPath("$.message").value("Usuário ou senha inválidos"));
+      .andExpect(jsonPath("$.message").value("Usuário ou senha inválidos"))
+      .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.userService, times(1)).login(loginData);
   }
 
   @Test
-  @DisplayName("Should return an error response with a not found status code if the user does not exist")
+  @DisplayName("userLogin - Should return an error response with a not found status code if the user does not exist")
   void userLoginFailByUserNotFound() throws Exception {
     LoginDTO loginData = new LoginDTO("teste1@email.com", "123456");
     String jsonBody = this.objectMapper.writeValueAsString(loginData);
@@ -192,13 +196,14 @@ public class UserControllerTest {
       .andExpect(status().isNotFound())
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.NOT_FOUND.value()))
-      .andExpect(jsonPath("$.message").value("Usuário não encontrado"));
+      .andExpect(jsonPath("$.message").value("Usuário não encontrado"))
+      .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.userService, times(1)).login(loginData);
   }
 
   @Test
-  @DisplayName("Should return a success response with the authenticated user info")
+  @DisplayName("getAuthUserProfile - Should return a success response with the authenticated user info")
   void getAuthUserProfileSuccess() throws Exception {
     UserResponseDTO user = new UserResponseDTO("01", "User 1", "teste1@email.com", this.mockDateTime);
 
@@ -218,7 +223,7 @@ public class UserControllerTest {
   }
 
   @Test
-  @DisplayName("Should return an error response with forbidden status code when provided ID is invalid")
+  @DisplayName("getAuthUserProfile - Should return an error response with forbidden status code when provided ID is invalid")
   void getAuthUserProfileFailByAccessDenied() throws Exception {
     when(this.userService.getAuthUserProfile(anyString())).thenThrow(new AccessDeniedException("Acesso negado!"));
 
@@ -226,13 +231,14 @@ public class UserControllerTest {
       .andExpect(status().isForbidden())
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.FORBIDDEN.value()))
-      .andExpect(jsonPath("$.message").value("Acesso negado!"));
+      .andExpect(jsonPath("$.message").value("Acesso negado!"))
+      .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.userService, times(1)).getAuthUserProfile(anyString());
   }
 
   @Test
-  @DisplayName("Should return an error response with not found status code if user does not exist")
+  @DisplayName("getAuthUserProfile - Should return an error response with not found status code if user does not exist")
   void getAuthUserProfileFailByUserNotFound() throws Exception {
     when(this.userService.getAuthUserProfile("01")).thenThrow(new RecordNotFoundException("Usuário não encontrado!"));
 
@@ -240,7 +246,8 @@ public class UserControllerTest {
       .andExpect(status().isNotFound())
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.NOT_FOUND.value()))
-      .andExpect(jsonPath("$.message").value("Usuário não encontrado!"));
+      .andExpect(jsonPath("$.message").value("Usuário não encontrado!"))
+      .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.userService, times(1)).getAuthUserProfile("01");
   }

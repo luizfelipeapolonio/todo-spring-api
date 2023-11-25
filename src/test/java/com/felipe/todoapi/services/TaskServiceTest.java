@@ -77,7 +77,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should return a task list with all tasks that belong to the authenticated user")
+  @DisplayName("getAllUserTasks - Should return a task list with all tasks that belong to the authenticated user")
   void getAllUserTasksSuccess() {
     User user = new User();
     user.setId("01");
@@ -100,7 +100,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw an AccessDeniedException when the authenticated user returns null")
+  @DisplayName("getAllUserTasks - Should throw an AccessDeniedException when the authenticated user returns null")
   void getAllUserTasksFailByNullAuthUser() throws AccessDeniedException {
     this.mockAuthentication(null);
 
@@ -115,7 +115,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should return all done or not done tasks of authenticated user")
+  @DisplayName("getAllDoneOrNotDoneTasks - Should return all done or not done tasks of authenticated user")
   void getAllDoneOrNotDoneTasksSuccess() {
     User user = new User();
     user.setId("01");
@@ -140,7 +140,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw an AccessDeniedException when the authenticated user returns null")
+  @DisplayName("getAllDoneOrNotDoneTasks - Should throw an AccessDeniedException when the authenticated user returns null")
   void getAllDoneOrNotDoneTasksFailByNullAuthUser() throws AccessDeniedException {
     this.mockAuthentication(null);
 
@@ -155,7 +155,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should successfully create a task and return it")
+  @DisplayName("createTask - Should successfully create a task and return it")
   void createTaskSuccess() {
     User user = new User();
     user.setId("01");
@@ -196,7 +196,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw an AccessDeniedException when the authenticated user returns null")
+  @DisplayName("createTask - Should throw an AccessDeniedException when the authenticated user returns null")
   void createTaskFailByNullAuthUser() throws AccessDeniedException {
     TaskCreateDTO taskDTO = new TaskCreateDTO("Task 1", "Descrição task 1", "baixa");
 
@@ -214,7 +214,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw a RecordNotFoundException when the user does not exist")
+  @DisplayName("createTask - Should throw a RecordNotFoundException when the user does not exist")
   void createTaskFailByNotFoundUser() throws RecordNotFoundException {
     TaskCreateDTO taskDTO = new TaskCreateDTO("Task 1", "Descrição task 1", "baixa");
 
@@ -241,7 +241,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should return a task according to the provided task ID")
+  @DisplayName("findTaskById - Should return a task according to the provided task ID")
   void findTaskByIdSuccess() {
     User user = new User();
     user.setId("01");
@@ -278,7 +278,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw an AccessDeniedException when the authenticated user returns null")
+  @DisplayName("findTaskById - Should throw an AccessDeniedException when the authenticated user returns null")
   void findTaskByIdFailByNullAuthUser() throws AccessDeniedException {
     this.mockAuthentication(null);
 
@@ -294,7 +294,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw an AccessDeniedException when the task's user ID is different from the authenticated user ID")
+  @DisplayName("findTaskById - Should throw an AccessDeniedException when the task's user ID is different from the authenticated user ID")
   void findTaskByIdFailByInvalidTaskUserId() throws AccessDeniedException {
     User user = new User();
     user.setId("01");
@@ -333,7 +333,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw a RecordNotFoundException when the task does not exist")
+  @DisplayName("findTaskById - Should throw a RecordNotFoundException when the task does not exist")
   void findTaskByIdFailByTaskNotFound() throws RecordNotFoundException {
     UserSpringSecurity authUser = new UserSpringSecurity("01", "teste1@email.com", "123456");
 
@@ -352,7 +352,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should update a task and return it")
+  @DisplayName("updateTask - Should update a task and return it")
   void updateTaskSuccess() {
     User user = new User();
     user.setId("01");
@@ -405,7 +405,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw an AccessDeniedException when the authenticated user returns null")
+  @DisplayName("updateTask - Should throw an AccessDeniedException when the authenticated user returns null")
   void updateTaskFailByNullAuthUser() throws AccessDeniedException {
     TaskUpdateDTO taskUpdateDTO = new TaskUpdateDTO(
       "Tarefa 1 atualizada",
@@ -428,7 +428,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw an AccessDeniedException when the task's user ID is different from the authenticated user ID")
+  @DisplayName("updateTask - Should throw an AccessDeniedException when the task's user ID is different from the authenticated user ID")
   void updateTaskFailByInvalidTaskUserId() throws AccessDeniedException {
     UserSpringSecurity authUser = new UserSpringSecurity("01", "teste1@email.com", "123456");
 
@@ -468,7 +468,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw a RecordNotFoundException when the task does not exist")
+  @DisplayName("updateTask - Should throw a RecordNotFoundException when the task does not exist")
   void updateTaskFailByTaskNotFound() throws RecordNotFoundException {
     UserSpringSecurity authUser = new UserSpringSecurity("01", "teste1@email.com", "123456");
 
@@ -494,7 +494,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should delete a task successfully and not throw any exceptions")
+  @DisplayName("deleteTask - Should delete a task successfully and not throw any exceptions")
   void deleteTaskSuccess() {
     User user = new User();
     user.setId("01");
@@ -525,7 +525,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw an AccessDeniedException when the authenticated user returns null")
+  @DisplayName("deleteTask - Should throw an AccessDeniedException when the authenticated user returns null")
   void deleteTaskFailByNullAuthUser() throws AccessDeniedException {
     this.mockAuthentication(null);
 
@@ -541,7 +541,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw an AccessDeniedException when the task's user ID is different from the authenticated user ID")
+  @DisplayName("deleteTask - Should throw an AccessDeniedException when the task's user ID is different from the authenticated user ID")
   void deleteTaskFailByInvalidTaskUserId() throws AccessDeniedException {
     UserSpringSecurity authUser = new UserSpringSecurity("01", "teste1@email.com", "123456");
 
@@ -574,7 +574,7 @@ public class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw a RecordNotFoundException when the task does not exist")
+  @DisplayName("deleteTask - Should throw a RecordNotFoundException when the task does not exist")
   void deleteTaskFailByTaskNotFound() throws RecordNotFoundException {
     UserSpringSecurity authUser = new UserSpringSecurity("01", "teste1@email.com", "123456");
 
