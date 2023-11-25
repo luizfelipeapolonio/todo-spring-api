@@ -147,7 +147,8 @@ public class TaskControllerTest {
       .andExpect(status().isForbidden())
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.FORBIDDEN.value()))
-      .andExpect(jsonPath("$.message").value("Acesso negado"));
+      .andExpect(jsonPath("$.message").value("Acesso negado"))
+      .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.taskService, times(1)).getAllUserTasks(anyString(), anyString());
   }
@@ -207,7 +208,8 @@ public class TaskControllerTest {
       .andExpect(status().isForbidden())
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.FORBIDDEN.value()))
-      .andExpect(jsonPath("$.message").value("Acesso negado"));
+      .andExpect(jsonPath("$.message").value("Acesso negado"))
+      .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.taskService, times(1)).getAllDoneOrNotDoneTasks(anyString());
   }
@@ -248,7 +250,8 @@ public class TaskControllerTest {
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
-      .andExpect(jsonPath("$.message").value("O tipo de dado de algum campo provido é inválido ou inconsistente"));
+      .andExpect(jsonPath("$.message").value("O tipo de dado de algum campo provido é inválido ou inconsistente"))
+      .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.taskService, never()).create(any(TaskCreateDTO.class));
   }
@@ -267,7 +270,8 @@ public class TaskControllerTest {
       .andExpect(status().isForbidden())
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.FORBIDDEN.value()))
-      .andExpect(jsonPath("$.message").value("Acesso negado"));
+      .andExpect(jsonPath("$.message").value("Acesso negado"))
+      .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.taskService, times(1)).create(any(TaskCreateDTO.class));
   }
@@ -287,7 +291,8 @@ public class TaskControllerTest {
       .andExpect(status().isNotFound())
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.NOT_FOUND.value()))
-      .andExpect(jsonPath("$.message").value("Usuário não encontrado"));
+      .andExpect(jsonPath("$.message").value("Usuário não encontrado"))
+      .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.taskService, times(1)).create(any(TaskCreateDTO.class));
   }
@@ -324,7 +329,8 @@ public class TaskControllerTest {
       .andExpect(status().isForbidden())
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.FORBIDDEN.value()))
-      .andExpect(jsonPath("$.message").value("Acesso negado"));
+      .andExpect(jsonPath("$.message").value("Acesso negado"))
+      .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.taskService, times(1)).findById(anyString());
   }
@@ -338,7 +344,8 @@ public class TaskControllerTest {
       .andExpect(status().isNotFound())
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.NOT_FOUND.value()))
-      .andExpect(jsonPath("$.message").value("Tarefa não encontrada"));
+      .andExpect(jsonPath("$.message").value("Tarefa não encontrada"))
+      .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.taskService, times(1)).findById("01");
   }
@@ -403,8 +410,24 @@ public class TaskControllerTest {
       .andExpect(status().isForbidden())
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.FORBIDDEN.value()))
-      .andExpect(jsonPath("$.message").value("Acesso negado"));
+      .andExpect(jsonPath("$.message").value("Acesso negado"))
+      .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.taskService, times(1)).update(anyString(), any(TaskUpdateDTO.class));
+  }
+
+  @Test
+  @DisplayName("updateTask - Should return an error response with bad request status code if the request body is null")
+  void updateTaskFailByNullRequestBody() throws Exception {
+    this.mockMvc.perform(patch(this.baseUrl + "/03")
+      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()))
+      .andExpect(jsonPath("$.message").value("O tipo de dado de algum campo provido é inválido ou inconsistente"))
+      .andExpect(jsonPath("$.data").doesNotExist());
+
+    verify(this.taskService, never()).update(anyString(), any(TaskUpdateDTO.class));
   }
 }
