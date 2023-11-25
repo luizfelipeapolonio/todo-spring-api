@@ -382,4 +382,29 @@ public class TaskControllerTest {
 
     verify(this.taskService, times(1)).update("03", task);
   }
+
+  @Test
+  @DisplayName("updateTask - Should return an error response with a forbidden status code due to invalid authentication")
+  void updateTaskFailByAccessDenied() throws Exception {
+    TaskUpdateDTO task = new TaskUpdateDTO(
+      "Tarefa 1 atualizada",
+      "Descrição 1 autalizada",
+      "media",
+      true
+    );
+    String jsonBody = this.objectMapper.writeValueAsString(task);
+
+    when(this.taskService.update(anyString(), any(TaskUpdateDTO.class)))
+      .thenThrow(new AccessDeniedException("Acesso negado"));
+
+    this.mockMvc.perform(patch(this.baseUrl + "/03")
+      .contentType(MediaType.APPLICATION_JSON).content(jsonBody)
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isForbidden())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.FORBIDDEN.value()))
+      .andExpect(jsonPath("$.message").value("Acesso negado"));
+
+    verify(this.taskService, times(1)).update(anyString(), any(TaskUpdateDTO.class));
+  }
 }
