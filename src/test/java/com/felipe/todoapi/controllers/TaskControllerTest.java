@@ -31,6 +31,7 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -470,6 +471,21 @@ public class TaskControllerTest {
       .andExpect(jsonPath("$.status").value(FailureResponseStatus.SUCCESS.getValue()))
       .andExpect(jsonPath("$.code").value(HttpStatus.OK.value()))
       .andExpect(jsonPath("$.message").value("Tarefa excluída com sucesso"))
+      .andExpect(jsonPath("$.data").doesNotExist());
+
+    verify(this.taskService, times(1)).delete("03");
+  }
+
+  @Test
+  @DisplayName("deleteTask - Should return an error response with a forbidden status code due to invalid authentication")
+  void deleteTaskFailByAccessDenied() throws Exception {
+    doThrow(new AccessDeniedException("Acesso negado")).when(this.taskService).delete("03");
+
+    this.mockMvc.perform(delete(this.baseUrl + "/03").accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isForbidden())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.FORBIDDEN.value()))
+      .andExpect(jsonPath("$.message").value("Acesso negado"))
       .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.taskService, times(1)).delete("03");
