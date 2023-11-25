@@ -29,6 +29,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -429,5 +430,31 @@ public class TaskControllerTest {
       .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.taskService, never()).update(anyString(), any(TaskUpdateDTO.class));
+  }
+
+  @Test
+  @DisplayName("updateTask - Should return an error response with a not found status code when the task is not found")
+  void updateTaskFailByTaskNotFound() throws Exception {
+    TaskUpdateDTO task = new TaskUpdateDTO(
+      "Tarefa 1 atualizada",
+      "Descrição 1 autalizada",
+      "media",
+      true
+    );
+    String jsonBody = this.objectMapper.writeValueAsString(task);
+
+    when(this.taskService.update(eq("03"), any(TaskUpdateDTO.class)))
+      .thenThrow(new RecordNotFoundException("Tarefa não encontrada"));
+
+    this.mockMvc.perform(patch(this.baseUrl + "/03")
+      .contentType(MediaType.APPLICATION_JSON).content(jsonBody)
+      .accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.NOT_FOUND.value()))
+      .andExpect(jsonPath("$.message").value("Tarefa não encontrada"))
+      .andExpect(jsonPath("$.data").doesNotExist());
+
+    verify(this.taskService, times(1)).update(eq("03"), any(TaskUpdateDTO.class));
   }
 }
