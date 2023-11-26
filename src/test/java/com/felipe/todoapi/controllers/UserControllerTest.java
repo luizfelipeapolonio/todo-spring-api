@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.Mockito.when;
@@ -34,6 +35,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
@@ -250,5 +253,50 @@ public class UserControllerTest {
       .andExpect(jsonPath("$.data").doesNotExist());
 
     verify(this.userService, times(1)).getAuthUserProfile("01");
+  }
+
+  @Test
+  @DisplayName("deleteUser - Should delete a user successfully and return a success response")
+  void deleteUserSuccess() throws Exception {
+    doNothing().when(this.userService).delete("01");
+
+    this.mockMvc.perform(delete(this.baseUrl + "/profile/01").accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.SUCCESS.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.OK.value()))
+      .andExpect(jsonPath("$.message").value("Usuário excluído com sucesso"))
+      .andExpect(jsonPath("$.data").doesNotExist());
+
+    verify(this.userService, times(1)).delete("01");
+  }
+
+  @Test
+  @DisplayName("deleteUser - Should return an error response with forbidden status code when provided ID or authentication is invalid")
+  void deleteUserFailByAccessDenied() throws Exception {
+    doThrow(new AccessDeniedException("Acesso negado")).when(this.userService).delete("01");
+
+    this.mockMvc.perform(delete(this.baseUrl + "/profile/01").accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isForbidden())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.FORBIDDEN.value()))
+      .andExpect(jsonPath("$.message").value("Acesso negado"))
+      .andExpect(jsonPath("$.data").doesNotExist());
+
+    verify(this.userService, times(1)).delete("01");
+  }
+
+  @Test
+  @DisplayName("deleteUser - Should return an error response with not found status code if user does not exist")
+  void deleteUserFailByUserNotFound() throws Exception {
+    doThrow(new RecordNotFoundException("Usuário não encontrado")).when(this.userService).delete("01");
+
+    this.mockMvc.perform(delete(this.baseUrl + "/profile/01").accept(MediaType.APPLICATION_JSON))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.status").value(FailureResponseStatus.ERROR.getValue()))
+      .andExpect(jsonPath("$.code").value(HttpStatus.NOT_FOUND.value()))
+      .andExpect(jsonPath("$.message").value("Usuário não encontrado"))
+      .andExpect(jsonPath("$.data").doesNotExist());
+
+    verify(this.userService, times(1)).delete("01");
   }
 }

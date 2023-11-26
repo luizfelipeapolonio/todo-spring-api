@@ -30,6 +30,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.catchException;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.any;
@@ -38,6 +39,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
 
 public class UserServiceTest {
 
@@ -272,5 +274,92 @@ public class UserServiceTest {
 
     verify(this.securityContext, times(1)).getAuthentication();
     verify(this.userRepository, times(1)).findById(anyString());
+  }
+
+  @Test
+  @DisplayName("deleteUser - Should delete a user successfully and not throw any exceptions")
+  void deleteUserSuccess() {
+    User user = new User();
+    user.setId("01");
+    user.setName("User 1");
+    user.setEmail("teste1@email.com");
+    user.setPassword("123456");
+
+    UserSpringSecurity authUser = new UserSpringSecurity(user.getId(), user.getEmail(), user.getPassword());
+
+    when(this.authentication.getPrincipal()).thenReturn(authUser);
+    when(this.securityContext.getAuthentication()).thenReturn(this.authentication);
+    when(this.userRepository.findById("01")).thenReturn(Optional.of(user));
+    doNothing().when(this.userRepository).deleteById(user.getId());
+
+    SecurityContextHolder.setContext(this.securityContext);
+
+    assertThatNoException().isThrownBy(() -> this.userService.delete("01"));
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.userRepository, times(1)).findById("01");
+    verify(this.userRepository, times(1)).deleteById(user.getId());
+  }
+
+  @Test
+  @DisplayName("deleteUser - Should throw an AccessDeniedException when the authenticated user returns null")
+  void deleteUserFailByNullAuthUser() throws AccessDeniedException {
+    when(this.authentication.getPrincipal()).thenReturn(null);
+    when(this.securityContext.getAuthentication()).thenReturn(this.authentication);
+
+    SecurityContextHolder.setContext(this.securityContext);
+
+    Exception thrown = catchException(() -> this.userService.delete("01"));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(AccessDeniedException.class)
+      .hasMessage("Acesso negado");
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.userRepository, never()).findById(anyString());
+    verify(this.userRepository, never()).deleteById(anyString());
+  }
+
+  @Test
+  @DisplayName("deleteUser - Should throw an AccessDeniedException when the provided ID is different from the authenticated user's ID")
+  void deleteUserFailByDifferentUserId() throws AccessDeniedException {
+    UserSpringSecurity authUser = new UserSpringSecurity("01", "teste1@email.com", "123456");
+
+    when(this.authentication.getPrincipal()).thenReturn(authUser);
+    when(this.securityContext.getAuthentication()).thenReturn(this.authentication);
+
+    SecurityContextHolder.setContext(this.securityContext);
+
+    Exception thrown = catchException(() -> this.userService.delete("02"));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(AccessDeniedException.class)
+      .hasMessage("Acesso negado");
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.userRepository, never()).findById(anyString());
+    verify(this.userRepository, never()).deleteById(anyString());
+  }
+
+  @Test
+  @DisplayName("deleteUser - Should throw a RecordNotFoundException if the user is not found")
+  void deleteUserFailByUserNotFound() throws RecordNotFoundException {
+    UserSpringSecurity authUser = new UserSpringSecurity("01", "teste1@email.com", "123456");
+
+    when(this.authentication.getPrincipal()).thenReturn(authUser);
+    when(this.securityContext.getAuthentication()).thenReturn(this.authentication);
+    when(this.userRepository.findById("01")).thenReturn(Optional.empty());
+
+    SecurityContextHolder.setContext(this.securityContext);
+
+    Exception thrown = catchException(() -> this.userService.delete("01"));
+
+    assertThat(thrown)
+      .isExactlyInstanceOf(RecordNotFoundException.class)
+      .hasMessage("Usuário não encontrado");
+
+    verify(this.securityContext, times(1)).getAuthentication();
+    verify(this.userRepository, times(1)).findById("01");
+    verify(this.userRepository, never()).deleteById(anyString());
   }
 }
