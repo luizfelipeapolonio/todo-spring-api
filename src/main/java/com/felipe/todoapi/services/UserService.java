@@ -20,8 +20,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class UserService {
 
@@ -91,5 +89,18 @@ public class UserService {
         userFound.getCreatedAt()
       ))
       .orElseThrow(() -> new RecordNotFoundException("Usuário não encontrado!"));
+  }
+
+  public void delete(@NotNull @NotBlank String id) throws AccessDeniedException {
+    UserSpringSecurity authUser = AuthorizationService.getAuthentication();
+
+    if(authUser == null || !id.equals(authUser.getId())) {
+      throw new AccessDeniedException("Acesso negado");
+    }
+
+    User user = this.userRepository.findById(id)
+      .orElseThrow(() -> new RecordNotFoundException("Usuário não encontrado"));
+
+    this.userRepository.deleteById(user.getId());
   }
 }

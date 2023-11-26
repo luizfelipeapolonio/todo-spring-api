@@ -13,8 +13,6 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api")
 public class UserController {
@@ -65,5 +63,17 @@ public class UserController {
     responseBody.setData(authUserProfile);
 
     return responseBody;
+  }
+
+  @DeleteMapping("/profile/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  public CustomResponseBody<Void> delete(@PathVariable @NotNull @NotBlank String id) {
+    this.userService.delete(id);
+    return new CustomResponseBody<>(
+      FailureResponseStatus.SUCCESS,
+      HttpStatus.OK,
+      "Usuário excluído com sucesso",
+      null
+    );
   }
 }
