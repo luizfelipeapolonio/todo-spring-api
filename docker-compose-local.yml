@@ -10,9 +10,9 @@ services:
     volumes:
       - db_todo_spring:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB: todo_spring_api
-      - POSTGRES_USER: postgres
-      - POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: todo_spring_api
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
 
 volumes:
   db_todo_spring:
