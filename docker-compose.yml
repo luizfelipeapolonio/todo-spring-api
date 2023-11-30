@@ -6,6 +6,9 @@ services:
     ports:
       - "8080:8080"
     container_name: "todo_spring_api"
+    volumes:
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
     networks:
       - todo_spring_net
     depends_on:
