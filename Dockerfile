@@ -3,6 +3,8 @@ WORKDIR /application
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 COPY src ./src
+RUN apt-get update && apt-get install -y dos2unix && rm -rf /var/lib/apt/lists/*
+RUN dos2unix ./mvnw
 RUN chmod +x ./mvnw
 RUN ./mvnw clean package -DskipTests
 RUN java -Djarmode=layertools -jar ./target/*.jar extract
