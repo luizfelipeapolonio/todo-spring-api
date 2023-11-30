@@ -3,6 +3,7 @@ WORKDIR /application
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 COPY src ./src
+RUN chmod +x ./mvnw
 RUN ./mvnw clean package -DskipTests
 RUN java -Djarmode=layertools -jar ./target/*.jar extract
 
