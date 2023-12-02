@@ -122,7 +122,7 @@ Rotas de `Task`:
 - Gere a imagem Docker da aplicação com o comando:
   > ⚠ O " . " no final do comando é essencial para a execução, portanto, certifique-se de que o comando esteja exatamente igual a este.
   ```bash
-  $ docker build -t todo_spring_api .
+  $ docker build -t todo_spring_image .
   ```
 - Uma vez gerada a imagem, crie e inicialize os containers da aplicação e do banco de dados com o comando:
   ```bash
