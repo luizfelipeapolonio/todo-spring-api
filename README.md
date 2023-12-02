@@ -43,24 +43,24 @@ Principais recursos e funções da aplicação:
 
 Rotas referentes ao `User`:
 
-| Tipo                                                                    | Rota                                      | Ação             |
-| ---------------------------------------------------------------------   | ----------------------------------------- | ---------------- |
-| [![](https://img.shields.io/badge/POST-4682B4?style=for-the-badge)]()   | `http://localhost:8080/api/auth/login`    | Logar na aplicação |
-| [![](https://img.shields.io/badge/POST-4682B4?style=for-the-badge)]()   | `http://localhost:8080/api/auth/register` | Criar um novo usuário |
-| [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]()    | `http://localhost:8080/api/profile/{id}`  | Ver informações do usuário autenticado |
-| [![](https://img.shields.io/badge/DELETE-F74747?style=for-the-badge)]() | `http://localhost:8080/api/profile/{id}`  | Excluir usuário e todas as tarefas |
+| Tipo           | Rota                                      | Ação                                    |
+| :------------: | ----------------------------------------- | --------------------------------------- |
+| **_`POST`_**   | `http://localhost:8080/api/auth/login`    | Logar na aplicação .                    |
+| **_`POST`_**   | `http://localhost:8080/api/auth/register` | Criar um novo usuário .                 |
+| **_`GET`_**    | `http://localhost:8080/api/profile/{id}`  | Ver informações do usuário autenticado. |
+| **_`DELETE`_** | `http://localhost:8080/api/profile/{id}`  | Excluir usuário e todas as tarefas.     |
 
 <br />
 
 Rotas referentes a `Task`:
 
-| Tipo                                                                    | Rota                             | Ação             |
-| ----------------------------------------------------------------------- | -------------------------------- | ---------------- |
-| [![](https://img.shields.io/badge/POST-4682B4?style=for-the-badge)]()   | `http://localhost:8080/api/task`                             | Criar tarefa |
-| [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]()    | `http://localhost:8080/api/task?field={field}&order={order}` | Listar todas as tarefas do usuário. As tarefas podem ser filtradas por campo(field) e ordem(order) crescente(asc) e decrescente(desc) |
-| [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]()    | `http://localhost:8080/api/task/done?status={status}`  | Listar todas as tarefas marcadas como feitas ou não feitas de acordo com o valor passado no parâmetro `status`. Valores aceitos: `true` ou `false` |
-| [![](https://img.shields.io/badge/GET-2E8B57?style=for-the-badge)]()    | `http://localhost:8080/api/task/{id}`  | Ver tarefa específica de acordo com o `id` passado |
-| [![](https://img.shields.io/badge/PATCH-9370DB?style=for-the-badge)]()  | `http://localhost:8080/api/task/{id}`  | Atualizar tarefa específica de acordo com `id` passado |
-| [![](https://img.shields.io/badge/DELETE-F74747?style=for-the-badge)]() | `http://localhost:8080/api/task/{id}`  | Deletar tarefa específica de acordo com `id` passado |
+| Tipo                                                                          | Rota                              | Ação             |
+| :---------------------------------------------------------------------------: | --------------------------------- | ---------------- |
+| **_`POST`_**   | `http://localhost:8080/api/task`                             | Criar tarefa. |
+| **_`GET`_**    | `http://localhost:8080/api/task?field={field}&order={order}` | Listar todas as tarefas do usuário. As tarefas podem ser filtradas por campo(field) e ordem(order) crescente(`asc`) e decrescente(`desc`). |
+| **_`GET`_**    | `http://localhost:8080/api/task/done?status={status}`        | Listar todas as tarefas marcadas como feitas ou não feitas de acordo com o valor passado no parâmetro `status`. Valores aceitos: `true` ou `false`. |
+| **_`GET`_**    | `http://localhost:8080/api/task/{id}`                        | Ver tarefa específica de acordo com o `id` passado.     |
+| **_`PATCH`_**  | `http://localhost:8080/api/task/{id}`                        | Atualizar tarefa específica de acordo com `id` passado. |
+| **_`DELETE`_** | `http://localhost:8080/api/task/{id}`                        | Deletar tarefa específica de acordo com `id` passado.   |
 
 <br />
