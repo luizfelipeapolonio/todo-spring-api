@@ -6,6 +6,7 @@ Nesta ToDo API estão presentes todas as operações de CRUD, autenticação sta
 <br />
 
 <p align="center">
+  <a href="#api">Demonstração</a> •
   <a href="#technologies">Tecnologias utilizadas</a> •
   <a href="#functions">Funções/Recursos</a> •
   <a href="#routes">Rotas da API</a> •
@@ -15,6 +16,102 @@ Nesta ToDo API estão presentes todas as operações de CRUD, autenticação sta
 </p>
 
 <br />
+
+<h2 id="api">Demonstração</h2>
+
+Abaixo estão alguns print screens demonstrando as requisições e respostas da API feitas com o [Insomnia](https://insomnia.rest/).
+
+- Criar usuário e logar no sistema.
+  <details>
+    <summary>Clique aqui para ver as imagens</summary>
+    <br />
+    <img src="./assets/CreateUser_Todo_Spring_API.png" alt="Imagem mostrando a criação de usuário" />
+    <img src="./assets/Login_Todo_Spring_API.png" alt="Imagem mostrando o login de usuário" />
+  </details>
+
+<br />
+
+- Ver informações do usuário autenticado.
+  <details>
+    <summary>Clique aqui para ver a imagem</summary>
+    <br />
+    <img src="./assets/AuthUserInfo_Todo_Spring_API.png" alt="Imagem mostrando as informações do usuário autenticado" />
+  </details>
+
+<br />
+
+- Excluir usuário e todas suas tarefas.
+  <details>
+    <summary>Clique aqui para ver a imagem</summary>
+    <br />
+    <img src="./assets/DeleteUser_Todo_Spring_API.png" alt="Imagem mostrando a deleção de usuário" />
+  </details>
+
+<br />
+
+- Criar tarefa.
+  <details>
+    <summary>Clique aqui para ver a imagem</summary>
+    <br />
+    <img src="./assets/CreateTask_Todo_Spring_API.png" alt="Imagem demonstrando a criação de uma tarefa" />
+  </details>
+
+<br />
+
+- Atualizar tarefa.
+  <details>
+    <summary>Clique aqui para ver a imagem</summary>
+    <br />
+    <img src="./assets/UpdateTask_Todo_Spring_API.png" alt="Imagem mostrando atualização de tarefa" />
+  </details>
+
+<br />
+
+- Excluir tarefa.
+  <details>
+    <summary>Clique aqui para ver a imagem</summary>
+    <br />
+    <img src="./assets/DeleteTask_Todo_Spring_API.png" alt="Imagem mostrando a deleção de tarefa" />
+  </details>
+
+<br />
+
+- Listar todas as tarefas do usuário.
+  <details>
+    <summary>Clique aqui para ver a imagem</summary>
+    <br />
+    <img src="./assets/AllUserTasks_Todo_Spring_API.png" alt="Imagem mostrando todas as tarefas do usuário" />
+  </details>
+
+<br />
+
+- Ver tarefa específica.
+  <details>
+    <summary>Clique aqui para ver a imagem</summary>
+    <br />
+    <img src="./assets/GetTask_Todo_Spring_API.png" alt="Imagem mostrando tarefa específica" />
+  </details>
+
+<br />
+
+- Listar todas as tarefas marcadas como feitas.
+  <details>
+    <summary>Clique aqui para ver a imagem</summary>
+    <br />
+    <img src="./assets/GetDoneTasks_Todo_Spring_API.png" alt="Imagem mostrando todas as tarefas marcadas como feita" />
+  </details>
+
+<br />
+
+- Algumas das respostas de erro que a API retorna.
+  <details>
+    <summary>Clique aqui para ver as imagens</summary>
+    <br />
+    <img src="./assets/Error1_Todo_Spring_API.png" alt="Imagem mostrando uma resposta de erro" />
+    <img src="./assets/Error2_Todo_Spring_API.png" alt="Imagem mostrando uma resposta de erro" />
+    <img src="./assets/Error3_Todo_Spring_API.png" alt="Imagem mostrando uma resposta de erro" />
+    <img src="./assets/Error4_Todo_Spring_API.png" alt="Imagem mostrando uma resposta de erro" />
+  </details>
 
 <h2 id="technologies">💻 Tecnologias utilizadas</h2>
 As ferramentas que foram utilizadas na construção do projeto:
