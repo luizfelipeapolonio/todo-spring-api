@@ -25,8 +25,8 @@ Abaixo estão alguns print screens demonstrando as requisições e respostas da 
   <details>
     <summary>Clique aqui para ver as imagens</summary>
     <br />
-  <img src="./assets/CreateUser_Todo_Spring_API.png" height="480px" alt="Imagem mostrando a criação de usuário" />
-  <img src="./assets/Login_Todo_Spring_API.png" height="480px" alt="Imagem mostrando o login de usuário" />
+    <img src="./assets/CreateUser_Todo_Spring_API.png" height="480px" alt="Imagem mostrando a criação de usuário" />
+    <img src="./assets/Login_Todo_Spring_API.png" height="480px" alt="Imagem mostrando o login de usuário" />
   </details>
 
 <br />
