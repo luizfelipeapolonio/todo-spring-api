@@ -25,8 +25,8 @@ Abaixo estão alguns print screens demonstrando as requisições e respostas da 
   <details>
     <summary>Clique aqui para ver as imagens</summary>
     <br />
-    <img src="./assets/CreateUser_Todo_Spring_API.png" alt="Imagem mostrando a criação de usuário" />
-    <img src="./assets/Login_Todo_Spring_API.png" alt="Imagem mostrando o login de usuário" />
+    <img src="./assets/CreateUser_Todo_Spring_API.png" height="520px" alt="Imagem mostrando a criação de usuário" />
+    <img src="./assets/Login_Todo_Spring_API.png" height="520px" alt="Imagem mostrando o login de usuário" />
   </details>
 
 <br />
@@ -35,7 +35,7 @@ Abaixo estão alguns print screens demonstrando as requisições e respostas da 
   <details>
     <summary>Clique aqui para ver a imagem</summary>
     <br />
-    <img src="./assets/AuthUserInfo_Todo_Spring_API.png" alt="Imagem mostrando as informações do usuário autenticado" />
+    <img src="./assets/AuthUserInfo_Todo_Spring_API.png" height="520px" alt="Imagem mostrando as informações do usuário autenticado" />
   </details>
 
 <br />
@@ -44,7 +44,7 @@ Abaixo estão alguns print screens demonstrando as requisições e respostas da 
   <details>
     <summary>Clique aqui para ver a imagem</summary>
     <br />
-    <img src="./assets/DeleteUser_Todo_Spring_API.png" alt="Imagem mostrando a deleção de usuário" />
+    <img src="./assets/DeleteUser_Todo_Spring_API.png" height="520px" alt="Imagem mostrando a deleção de usuário" />
   </details>
 
 <br />
@@ -53,7 +53,7 @@ Abaixo estão alguns print screens demonstrando as requisições e respostas da 
   <details>
     <summary>Clique aqui para ver a imagem</summary>
     <br />
-    <img src="./assets/CreateTask_Todo_Spring_API.png" alt="Imagem demonstrando a criação de uma tarefa" />
+    <img src="./assets/CreateTask_Todo_Spring_API.png" height="520px" alt="Imagem demonstrando a criação de uma tarefa" />
   </details>
 
 <br />
@@ -62,7 +62,7 @@ Abaixo estão alguns print screens demonstrando as requisições e respostas da 
   <details>
     <summary>Clique aqui para ver a imagem</summary>
     <br />
-    <img src="./assets/UpdateTask_Todo_Spring_API.png" alt="Imagem mostrando atualização de tarefa" />
+    <img src="./assets/UpdateTask_Todo_Spring_API.png" height="520px" alt="Imagem mostrando atualização de tarefa" />
   </details>
 
 <br />
@@ -71,7 +71,7 @@ Abaixo estão alguns print screens demonstrando as requisições e respostas da 
   <details>
     <summary>Clique aqui para ver a imagem</summary>
     <br />
-    <img src="./assets/DeleteTask_Todo_Spring_API.png" alt="Imagem mostrando a deleção de tarefa" />
+    <img src="./assets/DeleteTask_Todo_Spring_API.png" height="520px" alt="Imagem mostrando a deleção de tarefa" />
   </details>
 
 <br />
@@ -80,7 +80,7 @@ Abaixo estão alguns print screens demonstrando as requisições e respostas da 
   <details>
     <summary>Clique aqui para ver a imagem</summary>
     <br />
-    <img src="./assets/AllUserTasks_Todo_Spring_API.png" alt="Imagem mostrando todas as tarefas do usuário" />
+    <img src="./assets/AllUserTasks_Todo_Spring_API.png" height="520px" alt="Imagem mostrando todas as tarefas do usuário" />
   </details>
 
 <br />
@@ -89,7 +89,7 @@ Abaixo estão alguns print screens demonstrando as requisições e respostas da 
   <details>
     <summary>Clique aqui para ver a imagem</summary>
     <br />
-    <img src="./assets/GetTask_Todo_Spring_API.png" alt="Imagem mostrando tarefa específica" />
+    <img src="./assets/GetTask_Todo_Spring_API.png" height="520px" alt="Imagem mostrando tarefa específica" />
   </details>
 
 <br />
@@ -98,7 +98,7 @@ Abaixo estão alguns print screens demonstrando as requisições e respostas da 
   <details>
     <summary>Clique aqui para ver a imagem</summary>
     <br />
-    <img src="./assets/GetDoneTasks_Todo_Spring_API.png" alt="Imagem mostrando todas as tarefas marcadas como feita" />
+    <img src="./assets/GetDoneTasks_Todo_Spring_API.png" height="520px" alt="Imagem mostrando todas as tarefas marcadas como feita" />
   </details>
 
 <br />
@@ -107,10 +107,10 @@ Abaixo estão alguns print screens demonstrando as requisições e respostas da 
   <details>
     <summary>Clique aqui para ver as imagens</summary>
     <br />
-    <img src="./assets/Error1_Todo_Spring_API.png" alt="Imagem mostrando uma resposta de erro" />
-    <img src="./assets/Error2_Todo_Spring_API.png" alt="Imagem mostrando uma resposta de erro" />
-    <img src="./assets/Error3_Todo_Spring_API.png" alt="Imagem mostrando uma resposta de erro" />
-    <img src="./assets/Error4_Todo_Spring_API.png" alt="Imagem mostrando uma resposta de erro" />
+    <img src="./assets/Error1_Todo_Spring_API.png" height="520px" alt="Imagem mostrando uma resposta de erro" />
+    <img src="./assets/Error2_Todo_Spring_API.png" height="520px" alt="Imagem mostrando uma resposta de erro" />
+    <img src="./assets/Error3_Todo_Spring_API.png" height="520px" alt="Imagem mostrando uma resposta de erro" />
+    <img src="./assets/Error4_Todo_Spring_API.png" height="520px" alt="Imagem mostrando uma resposta de erro" />
   </details>
 
 <h2 id="technologies">💻 Tecnologias utilizadas</h2>
