@@ -12,7 +12,7 @@ Nesta ToDo API estão presentes todas as operações de CRUD, autenticação sta
   <a href="#routes">Rotas da API</a> •
   <a href="#run">Como rodar a aplicação</a> •
   <a href="#license">Licença</a> •
-  <a href="#author">Autor</a> •
+  <a href="#author">Autor</a>
 </p>
 
 <br />
